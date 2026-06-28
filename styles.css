@@ -1,0 +1,172 @@
+/* Supertags panel — themed via Obsidian CSS variables so it matches any theme. */
+
+.supertags-panel {
+  padding: 6px 4px 12px;
+}
+
+/* Header */
+.supertags-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 2px 6px 6px;
+}
+.supertags-title {
+  font-size: var(--font-ui-smaller);
+  letter-spacing: 0.08em;
+  font-weight: var(--font-semibold);
+  color: var(--text-faint);
+}
+.supertags-header-actions {
+  display: flex;
+  gap: 2px;
+}
+.supertags-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-s);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: none;
+}
+.supertags-iconbtn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.supertags-iconbtn .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Filter */
+.supertags-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 6px 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-m);
+  background: var(--background-modifier-form-field);
+  border: 1px solid var(--background-modifier-border);
+}
+.supertags-filter-icon .svg-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-faint);
+}
+.supertags-filter-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-normal);
+  font-size: var(--font-ui-small);
+  outline: none;
+  padding: 0;
+}
+
+/* List */
+.supertags-list {
+  display: flex;
+  flex-direction: column;
+}
+.supertags-group-header {
+  font-size: var(--font-ui-smaller);
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  padding: 10px 8px 4px;
+}
+.supertags-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  user-select: none;
+}
+.supertags-row:hover {
+  background: var(--background-modifier-hover);
+}
+.supertags-row-icon {
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.supertags-row-icon .svg-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+.supertags-row-name {
+  flex: 1;
+  font-size: var(--font-ui-small);
+  color: var(--text-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.supertags-row-count {
+  flex-shrink: 0;
+  font-size: var(--font-ui-smaller);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  min-width: 1.5em;
+  text-align: right;
+}
+.supertags-row.is-pinned .supertags-row-name {
+  font-weight: var(--font-medium);
+}
+.supertags-row.is-view {
+  color: var(--text-muted);
+}
+
+/* Empty state */
+.supertags-empty {
+  padding: 14px 10px;
+  color: var(--text-faint);
+  font-size: var(--font-ui-small);
+  line-height: 1.4;
+}
+
+/* Modals */
+.supertags-create-preview {
+  margin: 4px 0 10px;
+  font-size: var(--font-ui-small);
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+}
+.supertags-muted {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+.supertags-field-list {
+  margin: 8px 0;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+/* Inline suggest */
+.supertags-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.supertags-suggest-icon {
+  width: 18px;
+  text-align: center;
+}
+.supertags-suggest-name {
+  flex: 1;
+}
+.supertags-suggest-tag {
+  color: var(--text-faint);
+  font-size: var(--font-ui-smaller);
+}

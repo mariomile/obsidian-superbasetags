@@ -1,0 +1,26 @@
+{
+  "name": "obsidian-supertags",
+  "version": "0.1.0",
+  "description": "Tana-style supertags for Obsidian, built on #type/* tags and Bases.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "bases",
+    "supertags",
+    "tana"
+  ],
+  "author": "Mario Miletta",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.25.0",
+    "obsidian": "latest",
+    "typescript": "^5.8.0"
+  }
+}
