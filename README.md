@@ -1,4 +1,4 @@
-# Supertags
+# SuperBaseTags
 
 Tana-style **supertags for Obsidian**, built on the primitives you already have:
 `#type/*` tags and [Bases](https://help.obsidian.md/bases). No new data model —

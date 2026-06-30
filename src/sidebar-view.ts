@@ -23,7 +23,7 @@ export class SupertagsView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Supertags";
+    return "SuperBaseTags";
   }
 
   getIcon(): string {

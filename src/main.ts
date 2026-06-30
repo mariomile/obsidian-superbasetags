@@ -52,7 +52,7 @@ export default class SupertagsPlugin extends Plugin {
 
     this.registerView(VIEW_TYPE_SUPERTAGS, (leaf) => new SupertagsView(leaf, this));
 
-    this.addRibbonIcon("tags", "Supertags", () => this.activateView());
+    this.addRibbonIcon("tags", "SuperBaseTags", () => this.activateView());
 
     this.registerCommands();
     this.registerEventHandlers();
@@ -109,7 +109,7 @@ export default class SupertagsPlugin extends Plugin {
   private registerCommands(): void {
     this.addCommand({
       id: "open-panel",
-      name: "Open Supertags panel",
+      name: "Open SuperBaseTags panel",
       callback: () => void this.activateView(),
     });
     this.addCommand({

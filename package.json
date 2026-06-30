@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-supertags",
+  "name": "obsidian-superbasetags",
   "version": "0.1.0",
   "description": "Tana-style supertags for Obsidian, built on #type/* tags and Bases.",
   "main": "main.js",
