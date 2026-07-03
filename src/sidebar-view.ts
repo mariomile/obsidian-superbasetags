@@ -94,7 +94,7 @@ export class SupertagsView extends ItemView {
     setIcon(wrap.createSpan({ cls: "supertags-filter-icon" }), "search");
     const input = wrap.createEl("input", {
       cls: "supertags-filter-input",
-      attr: { type: "text", placeholder: "filtra…" },
+      attr: { type: "text", placeholder: "cerca…" },
     });
     input.value = this.filterText;
     input.addEventListener("input", () => {

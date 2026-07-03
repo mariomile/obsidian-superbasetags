@@ -77,6 +77,14 @@
   outline: none;
   padding: 0;
 }
+.supertags-filter .supertags-filter-input:focus,
+.supertags-filter .supertags-filter-input:focus-visible,
+.supertags-filter .supertags-filter-input:active {
+  border: none;
+  box-shadow: none;
+  outline: none;
+  background: transparent;
+}
 
 /* List */
 .supertags-list {
