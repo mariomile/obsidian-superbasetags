@@ -131,7 +131,10 @@ export default class SupertagsPlugin extends Plugin {
   refreshView(): void {
     for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE_SUPERTAGS)) {
       const view = leaf.view;
-      if (view instanceof SupertagsView) view.render();
+      // Data-driven refresh: update only the list so the filter input keeps its
+      // focus/caret. Rebuilding the whole view on every metadata event would
+      // steal focus mid-typing (invisible cursor).
+      if (view instanceof SupertagsView) view.refresh();
     }
   }
 

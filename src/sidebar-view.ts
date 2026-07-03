@@ -36,7 +36,7 @@ export class SupertagsView extends ItemView {
     this.render();
   }
 
-  /** Public re-render hook called by the plugin on data changes. */
+  /** Full rebuild. Used on open and structural (settings) changes. */
   render(): void {
     const root = this.contentEl;
     root.empty();
@@ -51,6 +51,20 @@ export class SupertagsView extends ItemView {
     if (this.plugin.settings.showViewsSection) {
       this.renderViews(root);
     }
+  }
+
+  /**
+   * Lightweight refresh for data changes (counts, membership). Re-renders only
+   * the list, leaving the header and filter input untouched so focus and the
+   * text caret survive. Falls back to a full render if the list is missing.
+   */
+  refresh(): void {
+    const existing = this.contentEl.querySelector(".supertags-list");
+    if (!existing) {
+      this.render();
+      return;
+    }
+    this.renderListOnly();
   }
 
   // --- header / filter ------------------------------------------------------
