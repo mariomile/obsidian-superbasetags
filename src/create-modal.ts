@@ -2,7 +2,7 @@ import { Modal, Notice, Setting, stringifyYaml, type App } from "obsidian";
 import type SupertagsPlugin from "./main";
 
 /** Slugify a free-text name into a tag-safe segment. */
-function slugify(name: string): string {
+export function slugify(name: string): string {
   return name
     .toLowerCase()
     .trim()

@@ -9,6 +9,7 @@ import {
 } from "obsidian";
 import type SupertagsPlugin from "./main";
 import type { Supertag } from "./types";
+import { fuzzyFilterSupertags } from "./search";
 
 /**
  * In-editor supertag picker. Typing the configured trigger (default `++`)
@@ -43,12 +44,7 @@ export class SupertagSuggest extends EditorSuggest<Supertag> {
   }
 
   getSuggestions(context: EditorSuggestContext): Supertag[] {
-    const q = context.query.toLowerCase();
-    const all = this.plugin.registry.supertags;
-    if (!q) return all;
-    return all.filter(
-      (s) => s.baseName.toLowerCase().includes(q) || s.tag.toLowerCase().includes(q)
-    );
+    return fuzzyFilterSupertags(context.query, this.plugin.registry.supertags);
   }
 
   renderSuggestion(st: Supertag, el: HTMLElement): void {

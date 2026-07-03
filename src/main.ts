@@ -26,6 +26,8 @@ export default class SupertagsPlugin extends Plugin {
   private recountDebounced!: Debouncer<[], void>;
   private rebuildDebounced!: Debouncer<[], void>;
   private inlineSuggest: SupertagSuggest | null = null;
+  /** Full command ids we've registered for per-supertag "apply" commands. */
+  private supertagCommandIds = new Set<string>();
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -82,7 +84,48 @@ export default class SupertagsPlugin extends Plugin {
 
   async rebuild(): Promise<void> {
     await this.registry.rebuild();
+    this.syncSupertagCommands();
     this.refreshView();
+  }
+
+  /**
+   * Register one "Apply supertag: X" command per supertag so they're reachable
+   * from the command palette / hotkeys. Idempotent by id across rebuilds; prunes
+   * commands for supertags that no longer exist.
+   */
+  private syncSupertagCommands(): void {
+    const wanted = new Set<string>();
+    for (const st of this.registry.supertags) {
+      const localId = `apply-supertag:${st.tag}`;
+      const fullId = `${this.manifest.id}:${localId}`;
+      wanted.add(fullId);
+      if (this.supertagCommandIds.has(fullId)) continue;
+      this.addCommand({
+        id: localId,
+        name: `Apply supertag: ${st.baseName}`,
+        checkCallback: (checking) => {
+          const file = this.app.workspace.getActiveFile();
+          const ok = !!file && file.extension === "md";
+          if (ok && !checking) {
+            const fresh = this.registry.find(st.tag);
+            if (fresh) void this.applyToFile(file, fresh);
+          }
+          return ok;
+        },
+      });
+      this.supertagCommandIds.add(fullId);
+    }
+
+    // Prune stale commands (supertag deleted/renamed). Uses the internal command
+    // registry — guarded so a future API change degrades gracefully.
+    const commands = (this.app as unknown as {
+      commands?: { removeCommand?: (id: string) => void };
+    }).commands;
+    for (const id of [...this.supertagCommandIds]) {
+      if (wanted.has(id)) continue;
+      commands?.removeCommand?.(id);
+      this.supertagCommandIds.delete(id);
+    }
   }
 
   refreshView(): void {

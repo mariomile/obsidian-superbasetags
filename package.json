@@ -1,11 +1,13 @@
 {
   "name": "obsidian-superbasetags",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Tana-style supertags for Obsidian, built on #type/* tags and Bases.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production"
+    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "obsidian",
@@ -21,6 +23,7 @@
     "builtin-modules": "^4.0.0",
     "esbuild": "^0.25.0",
     "obsidian": "latest",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
   }
 }

@@ -100,7 +100,7 @@
 .supertags-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 5px 8px;
   border-radius: var(--radius-s);
   cursor: pointer;
@@ -108,6 +108,60 @@
 }
 .supertags-row:hover {
   background: var(--background-modifier-hover);
+}
+.supertags-row-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  flex-shrink: 0;
+  color: var(--text-faint);
+  border-radius: var(--radius-s);
+  transition: transform 120ms ease;
+}
+.supertags-row-chevron .svg-icon {
+  width: 13px;
+  height: 13px;
+}
+.supertags-row-chevron:hover {
+  color: var(--text-muted);
+}
+.supertags-row-chevron.is-expanded {
+  transform: rotate(90deg);
+}
+
+/* Expanded member preview */
+.supertags-members {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 4px 26px;
+  border-left: 1px solid var(--background-modifier-border);
+  padding-left: 6px;
+}
+.supertags-member {
+  padding: 3px 8px;
+  border-radius: var(--radius-s);
+  font-size: var(--font-ui-smaller);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.supertags-member:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+.supertags-member.is-more {
+  color: var(--text-faint);
+  font-style: italic;
+}
+.supertags-member.is-empty {
+  color: var(--text-faint);
+  cursor: default;
+}
+.supertags-member.is-empty:hover {
+  background: transparent;
 }
 .supertags-row-icon {
   width: 18px;
@@ -166,6 +220,33 @@
   margin: 8px 0;
   max-height: 50vh;
   overflow-y: auto;
+}
+
+/* Icon picker grid */
+.supertags-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+  gap: 4px;
+  margin: 10px 0;
+}
+.supertags-icon-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  background: var(--background-modifier-form-field);
+  cursor: pointer;
+  box-shadow: none;
+}
+.supertags-icon-cell:hover {
+  background: var(--background-modifier-hover);
+}
+.supertags-icon-cell.is-selected {
+  border-color: var(--interactive-accent);
 }
 
 /* Inline suggest */

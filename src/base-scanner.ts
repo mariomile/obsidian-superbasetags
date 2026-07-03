@@ -50,7 +50,7 @@ export function extractTag(filters: unknown, prefix: string): string | null {
 // --- field extraction -------------------------------------------------------
 
 /** Best-effort field type from the property key name. */
-function guessType(key: string): FieldType {
+export function guessType(key: string): FieldType {
   const k = key.toLowerCase();
   if (/(^|_)(date|at|on)$/.test(k) || k.includes("date") || k.endsWith("_at")) return "date";
   if (k.startsWith("is_") || k.startsWith("has_") || k === "done" || k === "completed") return "checkbox";
@@ -97,7 +97,7 @@ export interface ScanOptions {
   scopeFolders: string[];
 }
 
-function inScope(path: string, scopeFolders: string[]): boolean {
+export function inScope(path: string, scopeFolders: string[]): boolean {
   if (scopeFolders.length === 0) return true;
   return scopeFolders.some((f) => path === f || path.startsWith(f.replace(/\/$/, "") + "/"));
 }

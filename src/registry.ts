@@ -1,4 +1,4 @@
-import { getAllTags, type App } from "obsidian";
+import { getAllTags, TFile, type App } from "obsidian";
 import { scanBases, type ScanOptions } from "./base-scanner";
 import { iconFor } from "./icons";
 import type { BaseView, Supertag, SupertagOverride } from "./types";
@@ -20,22 +20,19 @@ export class SupertagRegistry {
 
   constructor(private deps: RegistryDeps) {}
 
-  /** Count notes per bare tag (no leading #), de-duped per file. */
+  /**
+   * Count notes per bare tag (no leading #). Uses the metadata cache's
+   * pre-computed global tag counts — O(distinct tags) instead of walking every
+   * file on each recount. Occurrence-based like Obsidian's own tag pane; for
+   * frontmatter `type/*` tags that is one per note.
+   */
   private countTags(): Map<string, number> {
-    const counts = new Map<string, number>();
-    for (const f of this.deps.app.vault.getMarkdownFiles()) {
-      const cache = this.deps.app.metadataCache.getFileCache(f);
-      if (!cache) continue;
-      const tags = getAllTags(cache) ?? [];
-      const seen = new Set<string>();
-      for (const t of tags) {
-        const bare = t.replace(/^#/, "");
-        if (seen.has(bare)) continue;
-        seen.add(bare);
-        counts.set(bare, (counts.get(bare) ?? 0) + 1);
-      }
-    }
-    return counts;
+    // getTags() is a real MetadataCache method (powers the core tag pane) but is
+    // absent from the public typings — access it defensively.
+    const cache = this.deps.app.metadataCache as unknown as {
+      getTags?: () => Record<string, number>;
+    };
+    return normalizeTagCounts(cache.getTags?.() ?? {});
   }
 
   /** Full rebuild: rescan bases, recompute counts, merge overrides. */
@@ -63,7 +60,7 @@ export class SupertagRegistry {
         icon: ov.icon ?? iconFor(b.tag, defaultIcon),
         pinned: ov.pinned ?? false,
         group: ov.group,
-        memberCount: counts.get(b.tag) ?? 0,
+        memberCount: counts.get(b.tag.toLowerCase()) ?? 0,
       });
     }
 
@@ -75,13 +72,45 @@ export class SupertagRegistry {
   recount(): void {
     const counts = this.countTags();
     for (const st of this.supertags) {
-      st.memberCount = counts.get(st.tag) ?? 0;
+      st.memberCount = counts.get(st.tag.toLowerCase()) ?? 0;
     }
+  }
+
+  /**
+   * Notes carrying a tag, capped at `limit` for the expandable preview. Scans
+   * lazily (only when a row is expanded), stopping once the cap is reached.
+   */
+  membersOf(tag: string, limit: number): TFile[] {
+    const want = tag.toLowerCase();
+    const out: TFile[] = [];
+    for (const f of this.deps.app.vault.getMarkdownFiles()) {
+      const cache = this.deps.app.metadataCache.getFileCache(f);
+      if (!cache) continue;
+      const tags = getAllTags(cache) ?? [];
+      if (tags.some((t) => t.replace(/^#/, "").toLowerCase() === want)) {
+        out.push(f);
+        if (out.length >= limit) break;
+      }
+    }
+    return out.sort((a, b) => a.basename.localeCompare(b.basename));
   }
 
   find(tag: string): Supertag | undefined {
     return this.supertags.find((s) => s.tag === tag);
   }
+}
+
+/**
+ * Fold a raw `#tag → count` map (as returned by metadataCache.getTags()) into a
+ * bare, lowercased map, summing collisions from casing differences.
+ */
+export function normalizeTagCounts(raw: Record<string, number>): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const [tag, n] of Object.entries(raw)) {
+    const bare = tag.replace(/^#/, "").toLowerCase();
+    counts.set(bare, (counts.get(bare) ?? 0) + n);
+  }
+  return counts;
 }
 
 /** Pinned first, then alphabetical by display name. */

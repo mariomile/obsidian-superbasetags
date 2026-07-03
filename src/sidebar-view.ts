@@ -1,18 +1,20 @@
-import { ItemView, Menu, Notice, setIcon, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Menu, TFile, setIcon, type WorkspaceLeaf } from "obsidian";
 import type SupertagsPlugin from "./main";
 import type { Supertag } from "./types";
 import { CreateSupertagModal } from "./create-modal";
 import { FieldEditorModal } from "./field-editor-modal";
+import { GroupModal } from "./group-modal";
+import { IconPickerModal } from "./icon-picker-modal";
+import { fuzzyFilterSupertags } from "./search";
 
 export const VIEW_TYPE_SUPERTAGS = "supertags-panel";
 
-const ICON_CHOICES = [
-  "🏷️", "📍", "👤", "📄", "💡", "🏢", "📚", "🎯", "🚀", "📖",
-  "📰", "🎓", "🧭", "🧠", "🎙️", "🧩", "🗂️", "🗺️", "⭐", "🔖",
-];
+/** How many member notes to preview when a row is expanded. */
+const MEMBER_PREVIEW_LIMIT = 8;
 
 export class SupertagsView extends ItemView {
   private filterText = "";
+  private expanded = new Set<string>();
 
   constructor(leaf: WorkspaceLeaf, private plugin: SupertagsPlugin) {
     super(leaf);
@@ -44,20 +46,7 @@ export class SupertagsView extends ItemView {
     this.renderFilter(root);
 
     const list = root.createDiv({ cls: "supertags-list" });
-    const matches = this.visibleSupertags();
-
-    if (matches.length === 0) {
-      list.createDiv({
-        cls: "supertags-empty",
-        text: this.plugin.registry.supertags.length === 0
-          ? "No supertags found. Check your scope folders in settings, or create one."
-          : "No supertags match your filter.",
-      });
-    } else if (this.plugin.settings.groupView) {
-      this.renderGrouped(list, matches);
-    } else {
-      this.renderFlat(list, matches);
-    }
+    this.renderList(list);
 
     if (this.plugin.settings.showViewsSection) {
       this.renderViews(root);
@@ -101,20 +90,44 @@ export class SupertagsView extends ItemView {
       this.filterText = input.value;
       this.renderListOnly();
     });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const top = this.visibleSupertags()[0];
+        if (top) {
+          e.preventDefault();
+          this.plugin.openBase(top);
+        }
+      } else if (e.key === "Escape" && this.filterText) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.filterText = "";
+        input.value = "";
+        this.renderListOnly();
+      }
+    });
   }
 
   /** Re-render only the list portion (keeps filter focus stable). */
   private renderListOnly(): void {
     const existing = this.contentEl.querySelector(".supertags-list");
-    const matches = this.visibleSupertags();
     if (!existing) {
       this.render();
       return;
     }
     const list = existing as HTMLElement;
     list.empty();
+    this.renderList(list);
+  }
+
+  private renderList(list: HTMLElement): void {
+    const matches = this.visibleSupertags();
     if (matches.length === 0) {
-      list.createDiv({ cls: "supertags-empty", text: "No supertags match your filter." });
+      list.createDiv({
+        cls: "supertags-empty",
+        text: this.plugin.registry.supertags.length === 0
+          ? "No supertags found. Check your scope folders in settings, or create one."
+          : "No supertags match your filter.",
+      });
     } else if (this.plugin.settings.groupView) {
       this.renderGrouped(list, matches);
     } else {
@@ -125,12 +138,7 @@ export class SupertagsView extends ItemView {
   // --- rows -----------------------------------------------------------------
 
   private visibleSupertags(): Supertag[] {
-    const q = this.filterText.trim().toLowerCase();
-    const all = this.plugin.registry.supertags;
-    if (!q) return all;
-    return all.filter(
-      (s) => s.baseName.toLowerCase().includes(q) || s.tag.toLowerCase().includes(q)
-    );
+    return fuzzyFilterSupertags(this.filterText, this.plugin.registry.supertags);
   }
 
   private renderFlat(list: HTMLElement, items: Supertag[]): void {
@@ -163,14 +171,61 @@ export class SupertagsView extends ItemView {
   }
 
   private renderRow(list: HTMLElement, st: Supertag): void {
-    const row = list.createDiv({ cls: "supertags-row" });
+    const wrap = list.createDiv({ cls: "supertags-row-wrap" });
+    const row = wrap.createDiv({ cls: "supertags-row" });
     if (st.pinned) row.addClass("is-pinned");
+
+    const isExpanded = this.expanded.has(st.tag);
+    const chevron = row.createSpan({ cls: "supertags-row-chevron" });
+    setIcon(chevron, "chevron-right");
+    if (isExpanded) chevron.addClass("is-expanded");
+    chevron.setAttribute("aria-label", isExpanded ? "Collapse" : "Expand");
+    chevron.addEventListener("click", (e) => {
+      e.stopPropagation();
+      this.toggleExpand(st);
+    });
+
     row.createSpan({ cls: "supertags-row-icon", text: st.icon });
     row.createSpan({ cls: "supertags-row-name", text: st.baseName });
     row.createSpan({ cls: "supertags-row-count", text: String(st.memberCount) });
 
     row.addEventListener("click", () => this.plugin.openBase(st));
     row.addEventListener("contextmenu", (e) => this.openRowMenu(e, st));
+
+    if (isExpanded) this.renderMembers(wrap, st);
+  }
+
+  private toggleExpand(st: Supertag): void {
+    if (this.expanded.has(st.tag)) this.expanded.delete(st.tag);
+    else this.expanded.add(st.tag);
+    this.renderListOnly();
+  }
+
+  private renderMembers(wrap: HTMLElement, st: Supertag): void {
+    const box = wrap.createDiv({ cls: "supertags-members" });
+    const members = this.plugin.registry.membersOf(st.tag, MEMBER_PREVIEW_LIMIT + 1);
+
+    if (members.length === 0) {
+      box.createDiv({ cls: "supertags-member is-empty", text: "No notes yet" });
+      return;
+    }
+
+    for (const f of members.slice(0, MEMBER_PREVIEW_LIMIT)) {
+      const m = box.createDiv({ cls: "supertags-member", text: f.basename });
+      m.addEventListener("click", () => void this.openFile(f));
+    }
+
+    if (members.length > MEMBER_PREVIEW_LIMIT) {
+      const more = box.createDiv({
+        cls: "supertags-member is-more",
+        text: `+${st.memberCount - MEMBER_PREVIEW_LIMIT} more — open collection`,
+      });
+      more.addEventListener("click", () => this.plugin.openBase(st));
+    }
+  }
+
+  private async openFile(file: TFile): Promise<void> {
+    await this.app.workspace.getLeaf(false).openFile(file);
   }
 
   private renderViews(root: HTMLElement): void {
@@ -206,34 +261,15 @@ export class SupertagsView extends ItemView {
         .onClick(() => void this.plugin.setOverride(st.tag, { pinned: !st.pinned }))
     );
     menu.addItem((i) =>
-      i.setTitle("Set icon…").setIcon("smile").onClick(() => this.openIconMenu(e, st))
+      i.setTitle("Set icon…").setIcon("smile").onClick(() => new IconPickerModal(this.app, this.plugin, st).open())
     );
     menu.addItem((i) =>
-      i.setTitle("Set group…").setIcon("folder").onClick(() => this.promptGroup(st))
+      i.setTitle("Set group…").setIcon("folder").onClick(() => new GroupModal(this.app, this.plugin, st).open())
     );
     menu.addItem((i) =>
       i.setTitle("Edit fields…").setIcon("list").onClick(() => new FieldEditorModal(this.app, this.plugin, st).open())
     );
     menu.showAtMouseEvent(e);
-  }
-
-  private openIconMenu(e: MouseEvent, st: Supertag): void {
-    const menu = new Menu();
-    for (const ic of ICON_CHOICES) {
-      menu.addItem((i) =>
-        i.setTitle(ic).onClick(() => void this.plugin.setOverride(st.tag, { icon: ic }))
-      );
-    }
-    menu.showAtMouseEvent(e);
-  }
-
-  private promptGroup(st: Supertag): void {
-    // Lightweight inline prompt via a transient menu is awkward; use a Notice +
-    // the field editor pattern instead. Here we cycle through a simple prompt.
-    const current = st.group ?? "";
-    const next = window.prompt("Group label for this supertag (blank to clear):", current);
-    if (next === null) return;
-    void this.plugin.setOverride(st.tag, { group: next.trim() || undefined });
   }
 
   private openOptionsMenu(e: MouseEvent): void {

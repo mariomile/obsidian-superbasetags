@@ -1,7 +1,7 @@
 {
   "id": "superbasetags",
   "name": "SuperBaseTags",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "minAppVersion": "1.7.0",
   "description": "Turn your #type/* tags and Bases into a Tana-style supertag system: a sidebar hub of all your collections, with one-click typing of notes and default-field scaffolding.",
   "author": "Mario Miletta",

@@ -22,11 +22,18 @@ SUPERTAGS            ⚙  +
 
 - **Sidebar hub** — every `.base` that filters a `type/*` tag shows up as a
   supertag: icon · name · live member count. Click to open its collection.
+- **Expandable rows** — click the chevron to peek the first notes in a
+  collection inline; open one, or jump to the full base.
+- **Fuzzy filter** — the search box and inline picker rank matches with
+  Obsidian's fuzzy matcher; press `Enter` to open the top hit, `Esc` to clear.
 - **Type a note in one click** — "Apply supertag to current note" adds the
   `#type/X` tag *and* scaffolds the collection's fields as empty frontmatter
   (Tana-style). Toggle scaffolding off if you just want the tag.
-- **Pin, icon, group** — light per-supertag customisation, stored in the
-  plugin's `data.json`. Your `.base` files stay the source of truth.
+- **Command palette** — every supertag gets an `Apply supertag: X` command you
+  can bind to a hotkey.
+- **Pin, icon, group** — light per-supertag customisation (emoji grid picker,
+  group labels), stored in the plugin's `data.json`. Your `.base` files stay the
+  source of truth.
 - **Create supertags** — name it, get `type/<slug>` plus a starter `.base`.
 - **Inline picker** (opt-in) — type `++` in the editor to fuzzy-pick and apply.
 
@@ -51,6 +58,7 @@ empty to scan the whole vault.
 npm install
 npm run dev      # watch + deploy into the vault (see .obsidian-plugin-dir)
 npm run build    # typecheck + production bundle
+npm test         # vitest — unit tests for the pure logic (scanner, registry)
 ```
 
 Create a `.obsidian-plugin-dir` file containing the absolute path to your

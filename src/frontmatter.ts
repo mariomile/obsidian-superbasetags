@@ -2,7 +2,7 @@ import { type App, type TFile } from "obsidian";
 import type { Supertag, SupertagField } from "./types";
 
 /** Pick the empty/default value to write for a scaffolded field. */
-function defaultFor(f: SupertagField): unknown {
+export function defaultFor(f: SupertagField): unknown {
   if (f.default !== undefined && f.default !== null && f.default !== "") {
     return f.default;
   }
