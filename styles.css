@@ -45,45 +45,46 @@
   height: 16px;
 }
 
-/* Filter */
+/* Filter — shared search-bar pattern (see masonry/horizon): a native input as
+   the single pill, icon overlaid via absolute positioning, accent focus ring. */
 .supertags-filter {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 2px 6px 8px;
-  padding: 4px 8px;
-  border-radius: var(--radius-m);
-  background: var(--background-modifier-form-field);
-  border: 1px solid var(--background-modifier-border);
+  margin: 4px 8px 10px;
+}
+.supertags-filter-icon {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  pointer-events: none;
 }
 .supertags-filter-icon .svg-icon {
-  width: 14px;
-  height: 14px;
-  color: var(--text-faint);
+  width: 16px;
+  height: 16px;
 }
-/* Two-class selector: must out-rank Obsidian's core input[type='text'] (0,1,1) */
-.supertags-filter .supertags-filter-input {
-  flex: 1;
-  /* flex items default to min-width:auto; inputs have ~20ch intrinsic width and
-     would overflow narrow sidebars without this */
-  min-width: 0;
+.supertags-filter-input {
   width: 100%;
-  height: auto;
-  border: none;
-  box-shadow: none;
-  background: transparent;
+  /* inputs carry a ~20ch intrinsic width; without this they overflow the
+     sidebar instead of shrinking to it */
+  min-width: 0;
+  min-height: 36px;
+  padding-inline: 32px 10px !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  border-radius: var(--radius-m) !important;
+  background: var(--background-secondary) !important;
   color: var(--text-normal);
   font-size: var(--font-ui-small);
-  outline: none;
-  padding: 0;
+  box-shadow: none !important;
 }
-.supertags-filter .supertags-filter-input:focus,
-.supertags-filter .supertags-filter-input:focus-visible,
-.supertags-filter .supertags-filter-input:active {
-  border: none;
-  box-shadow: none;
-  outline: none;
-  background: transparent;
+.supertags-filter-input:focus,
+.supertags-filter-input:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+  box-shadow: none !important;
 }
 
 /* List */
