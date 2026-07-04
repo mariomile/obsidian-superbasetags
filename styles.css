@@ -80,7 +80,12 @@
   font-size: var(--font-ui-small);
   box-shadow: none !important;
 }
-.supertags-filter-input:focus,
+/* :focus-visible only (not :focus) — mouse clicks get no ring; keyboard Tab
+   still shows the accent outline for accessibility. Matches masonry/horizon. */
+.supertags-filter-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
 .supertags-filter-input:focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: 2px;
