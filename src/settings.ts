@@ -24,6 +24,14 @@ export interface SupertagsSettings {
 
   /** Per-tag overrides (icon, pin, group, field schema). */
   overrides: Record<string, SupertagOverride>;
+
+  // --- Phase 3: Bases interaction layer ---
+  /** Hover OPEN button on Bases table rows → peek modal (props + preview). */
+  rowPeek: boolean;
+  /** Color tag/list chips in Bases views (deterministic, .mv-pill-* classes). */
+  pillColorizer: boolean;
+  /** Per-value pill color overrides, keys normalized (lowercase, no #). */
+  pillColorOverrides: Record<string, string>;
 }
 
 export const DEFAULT_SETTINGS: SupertagsSettings = {
@@ -38,6 +46,10 @@ export const DEFAULT_SETTINGS: SupertagsSettings = {
   inlineTrigger: "++",
 
   overrides: {},
+
+  rowPeek: true,
+  pillColorizer: true,
+  pillColorOverrides: {},
 };
 
 export class SupertagsSettingTab extends PluginSettingTab {
@@ -148,6 +160,36 @@ export class SupertagsSettingTab extends PluginSettingTab {
           this.plugin.settings.inlineSuggest = v;
           await this.plugin.saveSettings();
           this.plugin.reloadInlineSuggest();
+        });
+      });
+
+    new Setting(containerEl).setName("Bases").setHeading();
+
+    new Setting(containerEl)
+      .setName("Row peek")
+      .setDesc(
+        "Hovering a Bases table row shows an OPEN button that peeks the note: editable properties + rendered preview."
+      )
+      .addToggle((tg) => {
+        tg.setValue(this.plugin.settings.rowPeek);
+        tg.onChange(async (v) => {
+          this.plugin.settings.rowPeek = v;
+          await this.plugin.saveSettings();
+          this.plugin.reloadBasesLayer();
+        });
+      });
+
+    new Setting(containerEl)
+      .setName("Pill colorizer")
+      .setDesc(
+        "Color tag and list chips in Bases views with a deterministic palette (.mv-pill classes, styled by the marioverse-bases snippet or this plugin's CSS). Per-value overrides live in data.json under pillColorOverrides."
+      )
+      .addToggle((tg) => {
+        tg.setValue(this.plugin.settings.pillColorizer);
+        tg.onChange(async (v) => {
+          this.plugin.settings.pillColorizer = v;
+          await this.plugin.saveSettings();
+          this.plugin.reloadBasesLayer();
         });
       });
 

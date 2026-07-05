@@ -36,6 +36,13 @@ SUPERTAGS            ⚙  +
   source of truth.
 - **Create supertags** — name it, get `type/<slug>` plus a starter `.base`.
 - **Inline picker** (opt-in) — type `++` in the editor to fuzzy-pick and apply.
+- **Row peek** — hover a Bases table row for an `OPEN` button (or run "Peek
+  active note") to open a modal with editable properties + a rendered preview,
+  Notion-style. Edits write straight to the note's frontmatter.
+- **Pill colorizer** — colours tag/list chips in Bases views with a
+  deterministic palette (`.mv-pill` classes), with per-value overrides in
+  `data.json`. Pairs with the vault's `marioverse-bases` snippet, but ships its
+  own fallback styles so it works standalone.
 
 ## How it maps
 

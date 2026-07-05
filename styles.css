@@ -280,3 +280,112 @@
   color: var(--text-faint);
   font-size: var(--font-ui-smaller);
 }
+
+/* ---------------------------------------------------------------------------
+   Bases interaction layer (Phase 3): row peek + pill colorizer.
+   Pill palette DUPLICATED from the marioverse-bases.css snippet on purpose —
+   the plugin must be self-contained without the vault snippet. Keep in sync.
+   --------------------------------------------------------------------------- */
+
+/* Hover OPEN button — parked on the hovered .bases-tr (row peek) */
+.bases-view .bases-tr {
+  position: relative;
+}
+.supertags-peek-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 5;
+  display: none;
+  padding: 1px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  font-family: var(--font-interface);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transform: translateY(-50%);
+  box-shadow: none;
+}
+.bases-view .bases-tr:hover .supertags-peek-btn {
+  display: inline-flex;
+}
+.supertags-peek-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+/* Peek modal */
+.supertags-peek-modal {
+  width: min(640px, 90vw);
+}
+.supertags-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.supertags-peek-header h3 {
+  margin: 0;
+  font-weight: 680;
+  letter-spacing: -0.02em;
+}
+.supertags-peek-props {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.supertags-peek-prop {
+  padding: 4px 0;
+  border: none;
+}
+.supertags-peek-prop .setting-item-name {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+}
+.supertags-peek-preview {
+  max-height: 44vh;
+  overflow-y: auto;
+  padding-top: 4px;
+}
+
+/* Pill palette (fallback when the marioverse-bases snippet is off).
+   Same rules as snippet §5 — Craft chips: tint + dot, no hard border. */
+.mv-pill {
+  --mv-pill-color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-color: transparent;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--mv-pill-color) 13%, transparent);
+  color: color-mix(in srgb, var(--mv-pill-color) 72%, var(--text-normal));
+  font-family: var(--font-interface);
+  font-size: 0.7rem;
+  font-weight: 580;
+  line-height: 1.6;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.mv-pill::before {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mv-pill-color);
+  content: '';
+  flex: 0 0 auto;
+}
+.mv-pill-red    { --mv-pill-color: var(--color-red); }
+.mv-pill-orange { --mv-pill-color: var(--color-orange); }
+.mv-pill-yellow { --mv-pill-color: var(--color-yellow); }
+.mv-pill-green  { --mv-pill-color: var(--color-green); }
+.mv-pill-cyan   { --mv-pill-color: var(--color-cyan); }
+.mv-pill-blue   { --mv-pill-color: var(--color-blue); }
+.mv-pill-purple { --mv-pill-color: var(--color-purple); }
+.mv-pill-pink   { --mv-pill-color: var(--color-pink); }
+.mv-pill-gray   { --mv-pill-color: var(--text-muted); }

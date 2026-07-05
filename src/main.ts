@@ -17,6 +17,8 @@ import { ApplyModal } from "./apply-modal";
 import { CreateSupertagModal } from "./create-modal";
 import { SupertagSuggest } from "./inline-suggest";
 import { applySupertag } from "./frontmatter";
+import { PillColorizer } from "./pill-colorizer";
+import { RowPeek } from "./row-peek";
 import type { Supertag, SupertagOverride } from "./types";
 
 export default class SupertagsPlugin extends Plugin {
@@ -26,6 +28,8 @@ export default class SupertagsPlugin extends Plugin {
   private recountDebounced!: Debouncer<[], void>;
   private rebuildDebounced!: Debouncer<[], void>;
   private inlineSuggest: SupertagSuggest | null = null;
+  private pillColorizer: PillColorizer | null = null;
+  private rowPeek: RowPeek | null = null;
   /** Full command ids we've registered for per-supertag "apply" commands. */
   private supertagCommandIds = new Set<string>();
 
@@ -63,11 +67,32 @@ export default class SupertagsPlugin extends Plugin {
     this.addSettingTab(new SupertagsSettingTab(this.app, this));
 
     // Build once the metadata cache is ready so counts are accurate.
-    this.app.workspace.onLayoutReady(() => void this.rebuild());
+    this.app.workspace.onLayoutReady(() => {
+      void this.rebuild();
+      this.reloadBasesLayer();
+    });
   }
 
   onunload(): void {
-    // Obsidian detaches the view; nothing else to clean up explicitly.
+    // Obsidian detaches the view and unbinds registerDomEvent handlers.
+    this.pillColorizer?.disable();
+    this.rowPeek?.disable();
+  }
+
+  /** (Re)apply the Bases interaction layer toggles (row peek, pill colorizer). */
+  reloadBasesLayer(): void {
+    if (this.settings.pillColorizer) {
+      this.pillColorizer ??= new PillColorizer(this);
+      this.pillColorizer.enable();
+    } else {
+      this.pillColorizer?.disable();
+    }
+    if (this.settings.rowPeek) {
+      this.rowPeek ??= new RowPeek(this);
+      this.rowPeek.enable();
+    } else {
+      this.rowPeek?.disable();
+    }
   }
 
   // --- settings -------------------------------------------------------------
