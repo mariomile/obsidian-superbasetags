@@ -68,7 +68,7 @@ export class CreateSupertagModal extends Modal {
 
     const prefix = this.plugin.settings.tagPrefix;
     const tag = `${prefix}${slug}`;
-    const folder = this.plugin.settings.scopeFolders[0] ?? "_system/views";
+    const folder = this.plugin.settings.scopeFolders[0] ?? "Bases";
     const path = `${folder}/${name}.base`;
 
     if (this.app.vault.getAbstractFileByPath(path)) {

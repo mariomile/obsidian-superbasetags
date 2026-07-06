@@ -1,11 +1,13 @@
 {
   "name": "obsidian-superbasetags",
   "version": "0.3.0",
+  "packageManager": "pnpm@10.17.1",
   "description": "Tana-style supertags for Obsidian, built on #type/* tags and Bases.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "build": "pnpm typecheck && node esbuild.config.mjs production",
+    "typecheck": "tsc --noEmit --skipLibCheck",
     "test": "vitest run",
     "test:watch": "vitest"
   },

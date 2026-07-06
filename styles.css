@@ -40,12 +40,11 @@
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
-/* No focus ring on buttons — Mario's preference (suite-wide, keyboard included). */
-:is([class^="supertags-"], [class*=" supertags-"]) :is(button, .clickable-icon, [role="button"]):focus,
+/* Preserve a visible keyboard focus indicator. */
 :is([class^="supertags-"], [class*=" supertags-"]) :is(button, .clickable-icon, [role="button"]):focus-visible,
-.supertags-iconbtn:focus,
 .supertags-iconbtn:focus-visible {
-  outline: none !important;
+  outline: 2px solid var(--interactive-accent) !important;
+  outline-offset: 2px;
   box-shadow: none !important;
 }
 .supertags-iconbtn .svg-icon {

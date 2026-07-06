@@ -41,8 +41,7 @@ SUPERTAGS            ⚙  +
   Notion-style. Edits write straight to the note's frontmatter.
 - **Pill colorizer** — colours tag/list chips in Bases views with a
   deterministic palette (`.mv-pill` classes), with per-value overrides in
-  `data.json`. Pairs with the vault's `marioverse-bases` snippet, but ships its
-  own fallback styles so it works standalone.
+  `data.json`. The required fallback styles ship with the plugin.
 
 ## How it maps
 
@@ -56,21 +55,20 @@ SUPERTAGS            ⚙  +
 ## Setup
 
 The supertag namespace is **configurable** (default `type/`) and the plugin
-scans the folders you set in settings (default `_system/views`). Set scope to
-empty to scan the whole vault.
+scans the folders you set in settings. The default empty scope scans the whole
+vault; set one or more folders to narrow it.
 
 ## Develop
 
 ```bash
-npm install
-npm run dev      # watch + deploy into the vault (see .obsidian-plugin-dir)
-npm run build    # typecheck + production bundle
-npm test         # vitest — unit tests for the pure logic (scanner, registry)
+pnpm install
+pnpm dev      # watch + deploy into the vault (see .obsidian-plugin-dir)
+pnpm build    # typecheck + production bundle
+pnpm test     # vitest — unit tests for the pure logic (scanner, registry)
 ```
 
 Create a `.obsidian-plugin-dir` file containing the absolute path to your
-vault's plugin folder to auto-deploy on build. Source lives in `src/`; design
-notes in `docs/`.
+vault's plugin folder to auto-deploy on build. Source lives in `src/`.
 
 ## License
 

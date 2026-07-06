@@ -35,7 +35,7 @@ export interface SupertagsSettings {
 }
 
 export const DEFAULT_SETTINGS: SupertagsSettings = {
-  scopeFolders: ["_system/views"],
+  scopeFolders: [],
   tagPrefix: "type/",
   scaffoldFields: true,
   defaultIcon: "🏷️",
@@ -70,7 +70,7 @@ export class SupertagsSettingTab extends PluginSettingTab {
       )
       .addTextArea((ta) => {
         ta.setValue(this.plugin.settings.scopeFolders.join("\n"));
-        ta.setPlaceholder("_system/views");
+        ta.setPlaceholder("Bases");
         ta.onChange(async (v) => {
           this.plugin.settings.scopeFolders = v
             .split("\n")
@@ -182,7 +182,7 @@ export class SupertagsSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Pill colorizer")
       .setDesc(
-        "Color tag and list chips in Bases views with a deterministic palette (.mv-pill classes, styled by the marioverse-bases snippet or this plugin's CSS). Per-value overrides live in data.json under pillColorOverrides."
+        "Color tag and list chips in Bases views with a deterministic palette (.mv-pill classes, styled by this plugin's CSS). Per-value overrides live in data.json under pillColorOverrides."
       )
       .addToggle((tg) => {
         tg.setValue(this.plugin.settings.pillColorizer);
