@@ -58,6 +58,10 @@ The supertag namespace is **configurable** (default `type/`) and the plugin
 scans the folders you set in settings. The default empty scope scans the whole
 vault; set one or more folders to narrow it.
 
+## Mobile
+
+**Verified** — `isDesktopOnly: false` in `manifest.json`; `styles.css` ships a `pointer: coarse` media query extending small control hit areas to 44pt Apple HIG.
+
 ## Develop
 
 ```bash
