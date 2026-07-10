@@ -66,6 +66,7 @@ const DONE_ATTR = "data-mv-pill";
 export class PillColorizer {
   private observer: MutationObserver | null = null;
   private scheduled = false;
+  private timer: number | null = null;
 
   constructor(private plugin: SupertagsPlugin) {}
 
@@ -97,6 +98,9 @@ export class PillColorizer {
   disable(): void {
     this.observer?.disconnect();
     this.observer = null;
+    if (this.timer !== null) window.clearTimeout(this.timer);
+    this.timer = null;
+    this.scheduled = false;
     for (const el of Array.from(
       document.querySelectorAll<HTMLElement>(`.bases-view [${DONE_ATTR}]`)
     )) {
@@ -123,8 +127,10 @@ export class PillColorizer {
     this.scheduled = true;
     // setTimeout, not rAF: rAF stalls while the window is unfocused/hidden
     // (Electron throttling), which silently skipped the initial pass.
-    window.setTimeout(() => {
+    this.timer = window.setTimeout(() => {
+      this.timer = null;
       this.scheduled = false;
+      if (!this.observer) return;
       this.decorateAll();
     }, 50);
   }

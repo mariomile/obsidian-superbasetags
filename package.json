@@ -1,6 +1,6 @@
 {
   "name": "obsidian-superbasetags",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "packageManager": "pnpm@10.17.1",
   "description": "Tana-style supertags for Obsidian, built on #type/* tags and Bases.",
   "main": "main.js",
