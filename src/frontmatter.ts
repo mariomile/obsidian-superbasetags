@@ -1,5 +1,6 @@
 import { type App, type TFile } from "obsidian";
 import type { Supertag, SupertagField } from "./types";
+import { addTagToFrontmatter, frontmatterTopKeys, patchFrontmatter } from "./frontmatter-patch";
 
 /** Pick the empty/default value to write for a scaffolded field. */
 export function defaultFor(f: SupertagField): unknown {
@@ -25,8 +26,9 @@ export interface ApplyResult {
 
 /**
  * Apply a supertag to a note: add its `type/X` tag to frontmatter `tags`, and
- * (optionally) scaffold its default fields as empty frontmatter keys. Uses
- * processFrontMatter so YAML formatting and conventions are preserved.
+ * (optionally) scaffold its default fields as empty frontmatter keys. Raw-text
+ * patch instead of processFrontMatter — the latter re-serializes the whole
+ * block and mangles unquoted wikilinks (`company: [[Acme]]`).
  */
 export async function applySupertag(
   app: App,
@@ -36,29 +38,28 @@ export async function applySupertag(
 ): Promise<ApplyResult> {
   const result: ApplyResult = { tagAdded: false, fieldsAdded: [] };
 
-  await app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => {
-    // --- tags ---
-    let tags = fm.tags;
-    if (tags == null) tags = [];
-    if (typeof tags === "string") tags = [tags];
-    if (!Array.isArray(tags)) tags = [];
+  await app.vault.process(file, (content) => {
+    let next = content;
 
-    const existing = (tags as unknown[]).map((t) => String(t).replace(/^#/, ""));
-    if (!existing.includes(st.tag)) {
-      (tags as unknown[]).push(st.tag);
+    const tagged = addTagToFrontmatter(next, st.tag);
+    if (tagged !== null) {
+      next = tagged;
       result.tagAdded = true;
     }
-    fm.tags = tags;
 
-    // --- scaffold default fields ---
     if (scaffold) {
+      const present = frontmatterTopKeys(next);
+      const changes: Record<string, unknown> = {};
       for (const f of st.fields) {
-        if (!(f.key in fm) || fm[f.key] === undefined) {
-          fm[f.key] = defaultFor(f);
+        if (!present.has(f.key)) {
+          changes[f.key] = defaultFor(f);
           result.fieldsAdded.push(f.key);
         }
       }
+      next = patchFrontmatter(next, changes);
     }
+
+    return next;
   });
 
   return result;

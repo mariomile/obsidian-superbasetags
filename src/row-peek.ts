@@ -8,11 +8,12 @@ import {
   type App,
 } from "obsidian";
 import type SupertagsPlugin from "./main";
+import { patchFrontmatter } from "./frontmatter-patch";
 
 /**
  * Notion-style row peek for native Bases table views: hovering a row reveals
  * an OPEN button; clicking it opens a modal with the note's frontmatter
- * (editable in place via processFrontMatter) plus a rendered preview of the
+ * (editable in place via raw-text patch) plus a rendered preview of the
  * body. The .base file and the note stay the source of truth — this is a
  * pure interaction layer.
  */
@@ -122,10 +123,11 @@ export class RowPeekModal extends Modal {
   ): Promise<void> {
     try {
       const value = parsePropertyInput(input, original);
-      await this.app.fileManager.processFrontMatter(this.file, (fm) => {
-        if (value === null) delete fm[key];
-        else fm[key] = value;
-      });
+      // Raw-text patch instead of processFrontMatter: only this key is
+      // rewritten, so unquoted wikilinks elsewhere in the block survive.
+      await this.app.vault.process(this.file, (content) =>
+        value === null ? patchFrontmatter(content, {}, [key]) : patchFrontmatter(content, { [key]: value })
+      );
     } catch (e) {
       console.error("[supertags] peek edit failed", e);
       new Notice(`Failed to update ${key} — see console.`);
