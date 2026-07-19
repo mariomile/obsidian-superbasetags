@@ -18,6 +18,8 @@ SUPERTAGS            ⚙  +
 🎯 Goal               9
 ```
 
+Part of the marioverse Obsidian plugin suite.
+
 ## What it does
 
 - **Sidebar hub** — every `.base` that filters a `type/*` tag shows up as a
