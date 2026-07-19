@@ -80,16 +80,17 @@ export class SupertagRegistry {
    * Notes carrying a tag, capped at `limit` for the expandable preview. Scans
    * lazily (only when a row is expanded), stopping once the cap is reached.
    */
-  membersOf(tag: string, limit: number): TFile[] {
+  membersOf(tag: string, limit = 100): TFile[] {
     const want = tag.toLowerCase();
     const out: TFile[] = [];
+    const cap = Math.max(1, Math.min(limit, 500));
     for (const f of this.deps.app.vault.getMarkdownFiles()) {
       const cache = this.deps.app.metadataCache.getFileCache(f);
       if (!cache) continue;
       const tags = getAllTags(cache) ?? [];
       if (tags.some((t) => t.replace(/^#/, "").toLowerCase() === want)) {
         out.push(f);
-        if (out.length >= limit) break;
+        if (out.length >= cap) break;
       }
     }
     return out.sort((a, b) => a.basename.localeCompare(b.basename));
