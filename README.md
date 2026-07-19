@@ -20,6 +20,11 @@ SUPERTAGS            ⚙  +
 
 Part of the marioverse Obsidian plugin suite.
 
+<p align="center">
+  <img src="docs/hub.png" width="380" alt="SuperBaseTags — the supertags hub" />
+</p>
+<p align="center"><em>Every collection with a live member count, one click away.</em></p>
+
 ## What it does
 
 - **Sidebar hub** — every `.base` that filters a `type/*` tag shows up as a
