@@ -81,6 +81,10 @@ pnpm test     # vitest — unit tests for the pure logic (scanner, registry)
 Create a `.obsidian-plugin-dir` file containing the absolute path to your
 vault's plugin folder to auto-deploy on build. Source lives in `src/`.
 
+## Try it
+
+See it running in the [Obsidianverse sample vault](https://github.com/mariomile/obsidianverse-sample-vault) — a small, fictional vault with the whole plugin suite pre-configured.
+
 ## License
 
 MIT © Mario Miletta
