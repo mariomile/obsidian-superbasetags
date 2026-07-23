@@ -1,3 +1,4 @@
+import type { EventRef } from "obsidian";
 import type SupertagsPlugin from "./main";
 
 /**
@@ -60,13 +61,24 @@ const DONE_ATTR = "data-mv-pill";
 
 /**
  * DOM layer: watches Bases views and decorates `.value-list-element` leaf
- * chips. Uses one body-level MutationObserver batched through rAF — Bases
- * rerenders rows wholesale, so per-view observers would churn anyway.
+ * chips. Uses one MutationObserver batched through a timer — Bases rerenders
+ * rows wholesale, so per-view observers would churn anyway.
+ *
+ * The observer is scoped to the workspace container (not document.body, which
+ * would also catch ribbon/status-bar/modal/popover mutations from every other
+ * plugin) and, crucially, is only *connected while a Bases view is actually
+ * mounted*. When Mario is writing in a normal note with no Base open, this
+ * plugin does zero work per keystroke instead of running closest() walks on
+ * every editor DOM mutation. Connection is (re)synced on workspace layout and
+ * leaf changes, with deferred rechecks to catch Bases views that render async.
  */
 export class PillColorizer {
   private observer: MutationObserver | null = null;
+  private connected = false;
   private scheduled = false;
   private timer: number | null = null;
+  private layoutRefs: EventRef[] = [];
+  private recheckTimers: number[] = [];
 
   constructor(private plugin: SupertagsPlugin) {}
 
@@ -91,13 +103,52 @@ export class PillColorizer {
         }
       }
     });
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
+    const ws = this.plugin.app.workspace;
+    this.layoutRefs.push(ws.on("layout-change", () => this.syncObserver()));
+    this.layoutRefs.push(ws.on("active-leaf-change", () => this.syncObserver()));
+    this.syncObserver();
+  }
+
+  /** Connect the observer only while a Bases view is mounted; disconnect when
+   *  none is open. Deferred rechecks cover views that render after the layout
+   *  event fires (embedded Bases, async first paint). */
+  private syncObserver(): void {
+    if (!this.observer) return;
+    const root = this.plugin.app.workspace.containerEl ?? document.body;
+    const hasBases = document.querySelector(".bases-view") !== null;
+    if (hasBases && !this.connected) {
+      this.observer.observe(root, { childList: true, subtree: true });
+      this.connected = true;
+      this.schedule();
+    } else if (!hasBases && this.connected) {
+      this.observer.disconnect();
+      this.connected = false;
+    }
+    for (const t of this.recheckTimers) window.clearTimeout(t);
+    this.recheckTimers = [];
+    if (!hasBases) {
+      // A Bases view may still be painting; recheck shortly without spinning.
+      for (const t of [120, 500]) {
+        this.recheckTimers.push(
+          window.setTimeout(() => {
+            if (this.observer && !this.connected && document.querySelector(".bases-view")) {
+              this.syncObserver();
+            }
+          }, t)
+        );
+      }
+    }
   }
 
   disable(): void {
     this.observer?.disconnect();
     this.observer = null;
+    this.connected = false;
+    const ws = this.plugin.app.workspace;
+    for (const ref of this.layoutRefs) ws.offref(ref);
+    this.layoutRefs = [];
+    for (const t of this.recheckTimers) window.clearTimeout(t);
+    this.recheckTimers = [];
     if (this.timer !== null) window.clearTimeout(this.timer);
     this.timer = null;
     this.scheduled = false;
