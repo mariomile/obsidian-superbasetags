@@ -40,7 +40,9 @@
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
-/* Preserve a visible keyboard focus indicator. */
+/* Preserve a visible keyboard focus indicator. The important-flagged
+   declarations below outrank whatever focus ring the active theme/core
+   would otherwise draw, so this accent outline is the only one visible. */
 :is([class^="supertags-"], [class*=" supertags-"]) :is(button, .clickable-icon, [role="button"]):focus-visible,
 .supertags-iconbtn:focus-visible {
   outline: 2px solid var(--interactive-accent) !important;
@@ -73,6 +75,10 @@
   width: 16px;
   height: 16px;
 }
+/* The important-flagged declarations below outrank Obsidian's native
+   input/theme form-field chrome (border, background, shadow, padding) so
+   the field renders as one continuous pill instead of a nested
+   input-in-a-box look — see the pattern comment above. */
 .supertags-filter-input {
   width: 100%;
   /* inputs carry a ~20ch intrinsic width; without this they overflow the
@@ -88,7 +94,10 @@
   box-shadow: none !important;
 }
 /* :focus-visible only (not :focus) — mouse clicks get no ring; keyboard Tab
-   still shows the accent outline for accessibility. Matches masonry/horizon. */
+   still shows the accent outline for accessibility. Matches masonry/horizon.
+   The important-flagged declarations below kill the native focus box so
+   only the deliberate :focus-visible accent ring shows, never on mouse
+   click. */
 .supertags-filter-input:focus {
   outline: none !important;
   box-shadow: none !important;
@@ -104,8 +113,12 @@
   display: flex;
   flex-direction: column;
 }
+/* mv-kit micro-label recipe (text already upper-cased in JS, see
+   sidebar-view.ts renderGroupHeader callers — text-transform would be a
+   no-op here so it's intentionally omitted). */
 .supertags-group-header {
   font-size: var(--font-ui-smaller);
+  font-weight: var(--font-medium);
   letter-spacing: 0.06em;
   color: var(--text-faint);
   padding: 10px 8px 4px;
@@ -130,7 +143,8 @@
   flex-shrink: 0;
   color: var(--text-faint);
   border-radius: var(--radius-s);
-  transition: transform 120ms ease;
+  /* mv-kit: physical hover/reveal easing on the micro-feedback duration tier. */
+  transition: transform var(--cosmos-t-fast, 140ms) var(--mv-lift, cubic-bezier(0.22, 1, 0.36, 1));
 }
 .supertags-row-chevron .svg-icon {
   width: 13px;
@@ -210,11 +224,11 @@
   color: var(--text-muted);
 }
 
-/* Empty state */
+/* Empty state — mv-kit whisper recipe: --text-faint + --font-ui-smaller. */
 .supertags-empty {
   padding: 14px 10px;
   color: var(--text-faint);
-  font-size: var(--font-ui-small);
+  font-size: var(--font-ui-smaller);
   line-height: 1.4;
 }
 
@@ -298,7 +312,7 @@
   display: none;
   padding: 1px 8px;
   border: 1px solid var(--background-modifier-border);
-  border-radius: 6px;
+  border-radius: var(--mv-r1, 6px);
   background: var(--background-primary);
   color: var(--text-muted);
   font-family: var(--font-interface);
@@ -399,6 +413,11 @@
   .supertags-iconbtn::after {
     content: '';
     position: absolute;
-    inset: calc((100% - 44px) / 2);
+    inset: calc((100% - var(--cosmos-touch-min, 44px)) / 2);
+  }
+  /* mv-kit: full-width text field, no hit-area trick needed — raise the
+     minimum directly to the touch floor. */
+  .supertags-filter-input {
+    min-height: var(--cosmos-touch-min, 44px);
   }
 }
