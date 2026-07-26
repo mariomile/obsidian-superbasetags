@@ -138,3 +138,142 @@ without removing one fails the contract test.
   plugins); phone changes (touch target, motion tokens) are verified by
   reading the resulting CSS values against the kit's phone column, not by
   rendering on-device.
+
+---
+
+# §6 — wave 2026-07 dinamica
+
+Audit of `styles.css` (423 lines pre-fix, 451 lines post-fix) + `src/`
+(`sidebar-view.ts`, `create-modal.ts`, `apply-modal.ts`,
+`field-editor-modal.ts`, `group-modal.ts`, `icon-picker-modal.ts`,
+`inline-suggest.ts`, `row-peek.ts`, `pill-colorizer.ts`, `main.ts`) against
+`obsidian-cosmos-theme/docs/mv-kit.md` §6 ("Elevation & motion depth",
+landed cosmos-theme commit `10f5ddc`, cantiere 2 — "Dinamica &
+profondità"), both desktop and phone columns. Scope: the four §6 sub-rules
+only (elevation hierarchy, hover richness, drag polish, panel/tab
+transitions) — coherence-only, no layout redesign, no new components, no
+new CSS files, same protocol as Ondata A (obsidian-portal
+`389d564`/`133c93d`/`4b95bf2`, obsidian-tabx `cc65cd4`/`a792752`/`662d11a`).
+**Pill-parity constraint carried over from wave 8:** `.mv-pill` (now lines
+~384-417) is a shared contract with `marioverse-bases.css` (Bases
+Craft-skin contract) — nothing in this wave touches its class contract,
+geometry, or colour math; confirmed by grep below.
+
+Per-rule verdict: **pass** (already compliant) / **fixed** (this wave) /
+**waived** (kit rule doesn't literally apply to this surface, with reason) /
+**N/A** (no surface of this type exists in the plugin).
+
+## Elevation hierarchy
+
+| Surface | Desktop | Phone | Verdict |
+|---|---|---|---|
+| `.supertags-peek-modal`, `.supertags-create-preview`'s modal, `create-modal.ts`/`field-editor-modal.ts`/`group-modal.ts`/`icon-picker-modal.ts` (Pop-tier candidates — dismissed by outside-click) | none of the five `Modal` subclasses define a bespoke `box-shadow` — confirmed via `grep -n "box-shadow" styles.css`: the only 7 hits are `none`/`none !important` (focus-ring and native-input overrides), zero elevation shadows | same | **N/A, nessuna superficie di questo tipo** — every modal inherits Obsidian core's/theme's native `.modal` chrome. There is no plugin-authored floating-surface shadow anywhere in the stylesheet to redirect onto `--cosmos-pop-shadow`; this reconfirms wave 8's identical §1 finding under §6's more detailed tier language. |
+| `sidebar-view.ts`'s two `new Menu()` context menus (`showFileMenu`/tag-row menu, lines 262/290) (Pop-tier candidates) | native Obsidian `Menu` API, zero plugin CSS targeting menu chrome — `grep -n "\.menu\b\|Menu {" styles.css`: zero hits | same | **N/A, nessuna superficie di questo tipo** — nothing plugin-authored to consume `--cosmos-pop-shadow` for. |
+| `SupertagSuggest` (`inline-suggest.ts`, `EditorSuggest` subclass — Pop-tier candidate) | native `EditorSuggest` popover chrome, no plugin CSS override | same | **N/A, nessuna superficie di questo tipo** — same reasoning; the suggest dropdown is 100% native rendering. |
+| `.supertags-panel` (persistent sidebar view — Island-tier candidate) | no Portal-style rail shadow; the panel renders inside Obsidian's native sidebar/tab-container chrome (`ItemView`), no plugin-owned `box-shadow` | same | **pass, waived** — same reasoning as Portal wave-2's identical verdict on `.portal-rail`: any Island-tier elevation on the sidedock itself is Cosmos's own `cosmos-islands.css` job (`.mod-left-split .workspace-tab-container`), not a per-plugin one. The panel correctly declares no shadow of its own — declaring one would create exactly the stacked-tier violation §6's MUST NOT forbids. |
+| Two tiers stacked on one element (Pop shadow **and** glass blur) | not present | not present | **pass, not applicable** — `grep -n "blur\|glass" styles.css`: zero hits. No glass/blur surface anywhere in this plugin, so there is nothing to stack against a Pop shadow. |
+| `.mv-pill` | literal `9999px` radius, no shadow, no elevation properties of any kind | same | **N/A, nessuna superficie di questo tipo** — a pill is Flat/inline-flow chrome (§6's own "Flat" tier: "inline chrome that sits in the document flow"), not a floating/persistent surface; also out of scope per the pill-parity constraint regardless (lines 398-431 post-fix, `git diff` confirms byte-identical). |
+
+## Hover richness
+
+| Rule | Desktop (pre-fix) | Phone | Verdict |
+|---|---|---|---|
+| Colour **and** lift, never colour alone | All 7 `:hover` rules in `styles.css` are colour/background washes only (`.supertags-iconbtn`, `.supertags-row`, `.supertags-row-chevron`, `.supertags-member`/`.is-empty`, `.supertags-icon-cell`, `.supertags-peek-btn`) — no `transform` lift on any of them | n/a, hover unreachable on touch once gated (see row below) | **pass, waived** — mv-kit's own §6 code example splits `.row:hover` (colour-only) from `.card:hover` (colour+lift) as two *distinct* patterns for two different surface shapes, not one rule both must satisfy. Cross-plugin precedent (already used by both Ondata A model repos): Masonry's `.masonry-card:hover` (a grid card) gets a lift; Sonar's `.sonar-result:hover` (a dense list row) is colour-only. Every one of this plugin's 7 hovers is a list-row/icon-button/pill shape — `.supertags-row`, `.supertags-member`, `.supertags-icon-cell` are all list/grid rows or small controls, never a card. Adding a `translateY` lift to a 24-28px-tall sidebar row would read as jitter, not the "hint" the kit describes for card surfaces. No lift-transform hover exists in this plugin, so the ≤2px cap is vacuously satisfied. |
+| `--mv-wash` for colour transitions, `--mv-lift` for transform transitions (not interchangeable) | None of the 7 hover rules declare a `transition` property at all (only `.supertags-row-chevron`'s *own* rule, not its `:hover` pseudo-class, has one) | same | **pass, not applicable** — there is exactly one `transition` declaration in the whole file (`.supertags-row-chevron`'s `transform … var(--mv-lift, …)`, fixed in wave 8's §3 pass), and it's a genuine physical transform (chevron rotate), correctly on `--mv-lift`, not a colour wash. No wash-transition exists anywhere to mis-wire onto `--mv-lift` — the file has no `--portal-motion`/`--tabx-ease`-style shared alias to audit for cross-wiring, since it never had more than one motion-bearing rule to begin with. `grep -n "transition" styles.css` confirms: 1 hit, unchanged this wave. |
+| `transform` lift never exceeds 2px | n/a — no lift-transform hover exists (see row above) | same | **pass, not applicable** |
+| Hover gated to `@media (hover: hover)` on phone-reachable elements | **was a violation**: 0 of the file's 7 `:hover` rules (8 `:hover`-containing selectors counting the `.bases-tr:hover .supertags-peek-btn` reveal trigger) were wrapped in `@media (hover: hover)`. The sidebar panel (`.supertags-panel`, `.supertags-row`, `.supertags-member`, `.supertags-iconbtn`) is phone-reachable by construction — it already ships a `@media (pointer: coarse)` hit-area-extension block (starting line 437), so the plugin itself treats this surface as touch-usable. The icon-picker grid (`.supertags-icon-cell`) renders inside a `Modal`, also touch-reachable. `.supertags-peek-btn` is the one exception (see next row). | same rule, now fixed | **fixed** — wrapped all 7 hover rules (8 selectors) in `@media (hover: hover)`: `.supertags-iconbtn`, `.supertags-row`, `.supertags-row-chevron`, `.supertags-member` + `.supertags-member.is-empty` (grouped together — the second is a hover override of the first, must travel with it), `.supertags-icon-cell`, and `.bases-view .bases-tr:hover .supertags-peek-btn` + `.supertags-peek-btn:hover` (grouped together — the reveal trigger and the button's own hover). No phone always-visible fallback was needed for any of the first five: unlike Portal's `.portal-collection-open` (whose *only* reveal mechanism was hover, made permanently unreachable by gating), none of this plugin's gated controls rely on hover to become visible or clickable in the first place — they are all already-visible rows/buttons that merely *change colour* on hover; gating only removes the colour change on touch, not the control itself. Guarded by a new style-contract test, verified red-green (see Style contract section below). |
+| `.supertags-peek-btn` reachability on phone | n/a (desktop-only judgement call already flagged in wave 8 §2, not a §6 finding) | **was and remains unreachable on touch** — its *entire* reveal (`display: none → inline-flex`) depends on `.bases-tr:hover`, which cannot fire on touch (no persistent hover state) | **waived, pre-existing gap, not regressed** — same defect class as TabX's auto-hide tab bar in the Ondata A model (`obsidian-tabx` `a792752`): gating this rule's `:hover` behind `@media (hover: hover)` does not create a new stuck-state risk (there was never a way for the touch browser to fire it and get stuck) and does not worsen the pre-existing reachability gap (it was already unreachable before this wave — `grep -n "isMobile\|Platform\." src/*.ts`: zero hits, confirming no tap-triggered alternative exists anywhere in the codebase). The reachability gap itself — row-peek having no tap affordance on phone — is a feature-interaction-design problem already flagged and explicitly out of scope in wave 8's §2 ("fixing it means designing a tap-triggered interaction, a behavior change outside coherence-only scope"); this wave does not reopen that judgement call, it only stops the mechanical rule from fighting the media-query discipline the rest of the file now follows. |
+
+## Drag polish
+
+| Surface | Desktop | Phone | Verdict |
+|---|---|---|---|
+| Any plugin-owned drag interaction (`.is-dragging`/`.is-dropped` or equivalent) | **does not exist** | **does not exist** | **N/A, nessuna superficie di questo tipo** — verified, not assumed: `grep -rn "draggable\|dragstart\|dragover\|drop\b\|\.is-dragging\|\.is-dropped" src/*.ts`: zero hits. This plugin implements no drag-and-drop of any kind — rows are click-to-toggle/click-to-open, the icon-picker grid is click-to-select, and pill colour assignment happens through modals, not drag. There is no dragged element, no drop target, and no drag-ghost styling anywhere in `src/` or `styles.css` for this rule to govern. |
+
+## Panel & tab transitions
+
+| Motion | Desktop | Phone | Verdict |
+|---|---|---|---|
+| Panel/sidebar open-close (`--cosmos-t-panel` + `--cosmos-native`) | `.supertags-panel` is a stock `ItemView` mounted in Obsidian's native sidedock — its open/close/resize animation is entirely native workspace chrome, no plugin CSS targets it | same | **N/A, nessuna superficie di questo tipo** — the plugin owns no structural panel-open/close transition; `grep -n "workspace-tab-container\|split\|sidedock" styles.css`: zero hits. |
+| Tab switch / tab-content swap (crossfade `opacity` only, `--cosmos-t-base` + `--cosmos-native`) | this plugin owns no tab surface — its "sections" (pinned/other/views groups) are static `display:flex` column stacks in a single scrolling list, not a tabbed content-swap interface; `.supertags-row-chevron`'s expand/collapse of `.supertags-members` is an inline disclosure, not a tab swap | same | **N/A, nessuna superficie di questo tipo** — confirmed via `sidebar-view.ts`: no `activeTab`/`setActiveLeaf`-style tab-switching logic exists in this plugin at all. |
+| `.supertags-row-chevron.is-expanded` (member-list disclosure toggle) | instant reveal — `.supertags-members` has no `display`/`max-height` transition, only the chevron icon itself rotates (`--mv-lift`, `--cosmos-t-fast` tier, already correct per wave 8's §3) | same | **pass, waived** — this is a tree-item disclosure (expand a group's member list), the same category Portal wave-2 waived for `.portal-section.is-collapsed .portal-section-body` under this exact heading: matches native Obsidian folder-tree collapse behaviour (instant, unanimated), and §6's panel-motion rule targets workspace-level structural chrome (sidebar open-close, ribbon peek) — a smaller-scoped in-panel disclosure toggle is a different interaction the rule doesn't reach. Not touched this wave (would be new animation scope, not a fix to an identified violation). |
+
+## Style contract — new §6 assertion
+
+One new assertion added to `test/style-contract.test.ts`, mechanically
+derived from the concrete finding above (zero speculative assertions, per
+this wave's brief — the plugin has exactly one §6 defect class: ungated
+hover):
+
+1. **`§6: every :hover selector is gated behind @media (hover: hover)`** —
+   a brace-depth scanner (identical algorithm to the Ondata A model's
+   `obsidian-portal` assertion of the same name) walks `styles.css`
+   (comments stripped) tracking whether each `:hover`-containing line opens
+   inside an `@media (hover: hover)` block; any that doesn't is a
+   violation, reported by line number and selector text.
+
+No second assertion for a `--mv-wash`/`--mv-lift` cross-wiring guard (the
+Ondata A model's second assertion in both reference repos) was added:
+unlike Portal/TabX, this plugin never had a shared motion alias to mis-wire
+in the first place — it has exactly one `transition` declaration in the
+whole file, already correctly using `--mv-lift` for a genuine transform.
+Adding a speculative guard against a violation class that was never present
+would contradict this wave's own "zero speculative assertions" mandate.
+
+**Red-before-green, verified this wave**: `git stash push -- styles.css`
+reverted the working tree to the pre-fix CSS (test file kept staged), ran
+`pnpm test` — the new assertion failed exactly as expected, flagging all 8
+ungated `:hover`-containing selectors by line number
+(`.supertags-iconbtn:hover`, `.supertags-row:hover`,
+`.supertags-row-chevron:hover`, `.supertags-member:hover`,
+`.supertags-member.is-empty:hover`, `.supertags-icon-cell:hover`,
+`.bases-view .bases-tr:hover .supertags-peek-btn`,
+`.supertags-peek-btn:hover`); all 4 pre-existing style-contract assertions
+stayed green throughout (67/68 total, 1 failing as expected). `git stash
+pop` restored the fix; re-ran — **68/68 green** (67 pre-wave + 1 new §6
+assertion).
+
+## Not touched (explicit non-goals, confirmed out of scope)
+
+- No layout/DOM changes anywhere — every fix in this wave is a `@media
+  (hover: hover)` wrapper addition around 7 already-shipped hover rules (8
+  selectors). No property values, selectors, or specificity changed inside
+  any rule body.
+- `.mv-pill` recipe (radius/padding/colour math/dot size) — shared contract
+  with `marioverse-bases.css`; confirmed untouched via `git diff
+  styles.css` scoped to the `.mv-pill*` block (lines 398-431 post-fix,
+  byte-identical to pre-fix).
+- `.supertags-peek-btn` phone reachability (see Hover richness above) — a
+  pre-existing, already-flagged (wave 8 §2) interaction-design gap, not a
+  §6 regression; gating its `:hover` doesn't change its reachability in
+  either direction.
+- No new drag, panel, or tab surface was built to give §6's Drag polish or
+  Panel/tab-transitions rules something to satisfy — this plugin owns
+  neither surface type, confirmed by grep, and building one would be new
+  component scope, forbidden by this wave's non-goals.
+
+## Verification
+
+- `pnpm test` (vitest) — **68/68 passing** (67 pre-wave + 1 new §6
+  assertion), 0 failing. Red-before-green re-verified via `git stash`
+  round-trip against the pre-fix CSS (see Style contract section above):
+  the new assertion failed as expected on the unfixed file, passed on the
+  fixed file; all 67 pre-existing tests across all 7 test files stayed
+  green throughout both runs.
+- `pnpm typecheck` / `pnpm build` — see `pnpm release:check` output quoted
+  verbatim in the commit message for this fix.
+- **No lint script exists in this repo** (`package.json` scripts:
+  `dev`/`build`/`release:check`/`typecheck`/`test`/`test:watch` — no
+  `lint`) — no lint result is claimed for this wave, consistent with the
+  brief's hard constraint not to invent one.
+- Desktop screenshot / live vault reload verification: **pending** — not
+  performed this wave, consistent with wave 8's own "pending" note and the
+  Ondata A model's same disclosure.
+- Phone verification: **pending Mario's on-device sign-off** — per hard
+  constraint, Obsidian's `EmulateMobile` was not used (it kills Node
+  plugins). The phone-side claims in this wave (all 7 gated hover rules
+  stop triggering on touch; `.supertags-peek-btn`'s reachability gap is
+  pre-existing and unchanged, not a new regression) are verified by
+  reading the resulting CSS against the kit's phone column and against
+  this plugin's own existing `@media (pointer: coarse)` precedent in the
+  same file, not by rendering on-device.
