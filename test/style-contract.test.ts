@@ -93,4 +93,53 @@ describe('mv-kit style contract', () => {
     // one fails this test — the ceiling can only ratchet down.
     expect(importantCount).toBeLessThanOrEqual(10);
   });
+
+  // mv-kit §6 (Elevation & motion depth) — wave 2026-07 dinamica, per
+  // docs/2026-07-mv-kit-audit.md's "§6 — wave 2026-07 dinamica" section.
+  //
+  // "A touch tap must never leave a stuck hover state — plugins must not
+  // fight it with custom :hover outside @media (hover: hover) on
+  // phone-reachable elements." A bare `.foo:hover {}` rule at the
+  // stylesheet's top level fires on tap on touch devices (the visual state
+  // gets "stuck" until an unrelated tap elsewhere) because touch has no
+  // pointer to leave. Every `:hover` selector in this file must therefore
+  // open inside an `@media (hover: hover)` block. Brace-depth tracking (not
+  // line-shape guessing): each `@media` opener records the nesting depth it
+  // was opened at plus whether it's a hover:hover query, and is popped only
+  // when depth unwinds back to that level — so a rule's own closing `}`
+  // inside the media block doesn't falsely pop it.
+  it('§6: every :hover selector is gated behind @media (hover: hover)', () => {
+    const lines = stripComments(css).split('\n');
+    const violations: string[] = [];
+
+    let depth = 0;
+    const mediaStack: { openedAtDepth: number; isHoverGate: boolean }[] = [];
+
+    lines.forEach((rawLine, idx) => {
+      const line = rawLine.trim();
+      const mediaOpen = /^@media\s*\(([^)]*)\)\s*\{/.exec(line);
+      if (mediaOpen) {
+        mediaStack.push({ openedAtDepth: depth, isHoverGate: /hover:\s*hover/.test(mediaOpen[1] ?? '') });
+      }
+
+      if (/:hover\b/.test(line)) {
+        const insideHoverGate = mediaStack.some((m) => m.isHoverGate);
+        if (!insideHoverGate) {
+          violations.push(`line ${idx + 1}: "${line}"`);
+        }
+      }
+
+      const opens = (line.match(/\{/g) ?? []).length;
+      const closes = (line.match(/\}/g) ?? []).length;
+      depth += opens - closes;
+
+      let top = mediaStack.at(-1);
+      while (top !== undefined && depth <= top.openedAtDepth) {
+        mediaStack.pop();
+        top = mediaStack.at(-1);
+      }
+    });
+
+    expect(violations).toEqual([]);
+  });
 });
