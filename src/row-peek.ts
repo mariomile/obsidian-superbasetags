@@ -76,7 +76,7 @@ export class RowPeekModal extends Modal {
     const header = contentEl.createDiv({ cls: "supertags-peek-header" });
     header.createEl("h3", { text: this.file.basename });
     const actions = header.createDiv({ cls: "supertags-peek-actions" });
-    const openBtn = actions.createEl("button", { text: "Apri nota" });
+    const openBtn = actions.createEl("button", { text: "Open note" });
     openBtn.addEventListener("click", () => {
       void this.app.workspace.getLeaf(false).openFile(this.file);
       this.close();
