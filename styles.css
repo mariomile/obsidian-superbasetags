@@ -36,9 +36,15 @@
   cursor: pointer;
   box-shadow: none;
 }
-.supertags-iconbtn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
+/* mv-kit §6: bare :hover on a phone-reachable control fires on tap and
+   leaves the wash "stuck" until an unrelated tap elsewhere — touch has no
+   pointer to leave. This button already has a coarse-pointer hit-area
+   extension below (line ~409), so it IS phone-reachable. */
+@media (hover: hover) {
+  .supertags-iconbtn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
 }
 /* Preserve a visible keyboard focus indicator. The important-flagged
    declarations below outrank whatever focus ring the active theme/core
@@ -132,8 +138,12 @@
   cursor: pointer;
   user-select: none;
 }
-.supertags-row:hover {
-  background: var(--background-modifier-hover);
+/* mv-kit §6: gated, see the .supertags-iconbtn:hover comment above — the
+   whole row is a full-width tap target on phone (sidebar list). */
+@media (hover: hover) {
+  .supertags-row:hover {
+    background: var(--background-modifier-hover);
+  }
 }
 .supertags-row-chevron {
   display: flex;
@@ -150,8 +160,11 @@
   width: 13px;
   height: 13px;
 }
-.supertags-row-chevron:hover {
-  color: var(--text-muted);
+/* mv-kit §6: gated, see the .supertags-iconbtn:hover comment above. */
+@media (hover: hover) {
+  .supertags-row-chevron:hover {
+    color: var(--text-muted);
+  }
 }
 .supertags-row-chevron.is-expanded {
   transform: rotate(90deg);
@@ -175,9 +188,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.supertags-member:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
+/* mv-kit §6: gated, see the .supertags-iconbtn:hover comment above — both
+   rules gated together since the second is a hover override of the first. */
+@media (hover: hover) {
+  .supertags-member:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
+  .supertags-member.is-empty:hover {
+    background: transparent;
+  }
 }
 .supertags-member.is-more {
   color: var(--text-faint);
@@ -186,9 +206,6 @@
 .supertags-member.is-empty {
   color: var(--text-faint);
   cursor: default;
-}
-.supertags-member.is-empty:hover {
-  background: transparent;
 }
 .supertags-row-icon {
   width: 18px;
@@ -269,8 +286,11 @@
   cursor: pointer;
   box-shadow: none;
 }
-.supertags-icon-cell:hover {
-  background: var(--background-modifier-hover);
+/* mv-kit §6: gated, see the .supertags-iconbtn:hover comment above. */
+@media (hover: hover) {
+  .supertags-icon-cell:hover {
+    background: var(--background-modifier-hover);
+  }
 }
 .supertags-icon-cell.is-selected {
   border-color: var(--interactive-accent);
@@ -323,12 +343,20 @@
   transform: translateY(-50%);
   box-shadow: none;
 }
-.bases-view .bases-tr:hover .supertags-peek-btn {
-  display: inline-flex;
-}
-.supertags-peek-btn:hover {
-  background: var(--background-modifier-hover);
-  color: var(--text-normal);
+/* mv-kit §6: gated, see the .supertags-iconbtn:hover comment above. This
+   reveal is desktop-only by construction (no tap-triggered alternative
+   exists — a pre-existing reachability gap already flagged in §2 of the
+   wave-8 audit, unchanged by this fix); gating the mechanical :hover rule
+   here doesn't regress reachability, it just stops fighting the media
+   query on the surfaces that already can't reach it. */
+@media (hover: hover) {
+  .bases-view .bases-tr:hover .supertags-peek-btn {
+    display: inline-flex;
+  }
+  .supertags-peek-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+  }
 }
 
 /* Peek modal */
