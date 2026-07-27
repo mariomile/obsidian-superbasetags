@@ -75,19 +75,19 @@ export class SupertagsView extends ItemView {
 
     const actions = header.createDiv({ cls: "supertags-header-actions" });
 
-    const applyBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { "aria-label": "Apply to current note" } });
+    const applyBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { type: "button", "aria-label": "Apply to current note" } });
     setIcon(applyBtn, "plus-circle");
     applyBtn.onclick = () => this.plugin.applyToActiveFile();
 
-    const createBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { "aria-label": "Create supertag" } });
+    const createBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { type: "button", "aria-label": "Create supertag" } });
     setIcon(createBtn, "plus");
     createBtn.onclick = () => new CreateSupertagModal(this.app, this.plugin).open();
 
-    const refreshBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { "aria-label": "Refresh" } });
+    const refreshBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { type: "button", "aria-label": "Refresh" } });
     setIcon(refreshBtn, "refresh-cw");
     refreshBtn.onclick = () => void this.plugin.rebuild();
 
-    const moreBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { "aria-label": "Options" } });
+    const moreBtn = actions.createEl("button", { cls: "supertags-iconbtn", attr: { type: "button", "aria-label": "Options" } });
     setIcon(moreBtn, "settings-2");
     moreBtn.onclick = (e) => this.openOptionsMenu(e);
   }
@@ -97,7 +97,7 @@ export class SupertagsView extends ItemView {
     setIcon(wrap.createSpan({ cls: "supertags-filter-icon" }), "search");
     const input = wrap.createEl("input", {
       cls: "supertags-filter-input",
-      attr: { type: "text", placeholder: "cerca…" },
+      attr: { type: "text", placeholder: "Search…", "aria-label": "Search supertags" },
     });
     input.value = this.filterText;
     input.addEventListener("input", () => {
@@ -190,20 +190,30 @@ export class SupertagsView extends ItemView {
     if (st.pinned) row.addClass("is-pinned");
 
     const isExpanded = this.expanded.has(st.tag);
-    const chevron = row.createSpan({ cls: "supertags-row-chevron" });
+    const chevron = row.createEl("button", {
+      cls: "supertags-row-chevron",
+      attr: {
+        type: "button",
+        "aria-label": `${isExpanded ? "Collapse" : "Expand"} ${st.baseName}`,
+        "aria-expanded": String(isExpanded),
+      },
+    });
     setIcon(chevron, "chevron-right");
     if (isExpanded) chevron.addClass("is-expanded");
-    chevron.setAttribute("aria-label", isExpanded ? "Collapse" : "Expand");
     chevron.addEventListener("click", (e) => {
       e.stopPropagation();
       this.toggleExpand(st);
     });
 
-    row.createSpan({ cls: "supertags-row-icon", text: st.icon });
-    row.createSpan({ cls: "supertags-row-name", text: st.baseName });
-    row.createSpan({ cls: "supertags-row-count", text: String(st.memberCount) });
+    const open = row.createEl("button", {
+      cls: "supertags-row-main",
+      attr: { type: "button", "aria-label": `Open ${st.baseName}` },
+    });
+    open.createSpan({ cls: "supertags-row-icon", text: st.icon });
+    open.createSpan({ cls: "supertags-row-name", text: st.baseName });
+    open.createSpan({ cls: "supertags-row-count", text: String(st.memberCount) });
 
-    row.addEventListener("click", () => this.plugin.openBase(st));
+    open.addEventListener("click", () => this.plugin.openBase(st));
     row.addEventListener("contextmenu", (e) => this.openRowMenu(e, st));
 
     if (isExpanded) this.renderMembers(wrap, st);
@@ -225,14 +235,19 @@ export class SupertagsView extends ItemView {
     }
 
     for (const f of members.slice(0, MEMBER_PREVIEW_LIMIT)) {
-      const m = box.createDiv({ cls: "supertags-member", text: f.basename });
+      const m = box.createEl("button", {
+        cls: "supertags-member",
+        text: f.basename,
+        attr: { type: "button" },
+      });
       m.addEventListener("click", () => void this.openFile(f));
     }
 
     if (members.length > MEMBER_PREVIEW_LIMIT) {
-      const more = box.createDiv({
+      const more = box.createEl("button", {
         cls: "supertags-member is-more",
         text: `+${st.memberCount - MEMBER_PREVIEW_LIMIT} more — open collection`,
+        attr: { type: "button" },
       });
       more.addEventListener("click", () => this.plugin.openBase(st));
     }
@@ -248,7 +263,10 @@ export class SupertagsView extends ItemView {
     root.createDiv({ cls: "supertags-group-header", text: "VIEWS" });
     const list = root.createDiv({ cls: "supertags-list" });
     for (const v of views) {
-      const row = list.createDiv({ cls: "supertags-row is-view" });
+      const row = list.createEl("button", {
+        cls: "supertags-row is-view",
+        attr: { type: "button", "aria-label": `Open ${v.name}` },
+      });
       setIcon(row.createSpan({ cls: "supertags-row-icon" }), "layout-grid");
       row.createSpan({ cls: "supertags-row-name", text: v.name });
       row.addEventListener("click", () => this.plugin.openBasePath(v.path));

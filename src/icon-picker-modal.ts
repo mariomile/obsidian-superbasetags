@@ -24,7 +24,15 @@ export class IconPickerModal extends Modal {
 
     const grid = contentEl.createDiv({ cls: "supertags-icon-grid" });
     for (const ic of ICON_CHOICES) {
-      const cell = grid.createEl("button", { cls: "supertags-icon-cell", text: ic });
+      const cell = grid.createEl("button", {
+        cls: "supertags-icon-cell",
+        text: ic,
+        attr: {
+          type: "button",
+          "aria-label": `Use ${ic}`,
+          "aria-pressed": String(ic === this.st.icon),
+        },
+      });
       if (ic === this.st.icon) cell.addClass("is-selected");
       cell.onclick = () => void this.pick(ic);
     }

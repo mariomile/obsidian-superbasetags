@@ -52,6 +52,16 @@ const ITALIAN_FUNCTION_WORDS = [
   "modifica",
   "cerca",
 ];
+const STRONG_ITALIAN_UI_WORDS = new Set([
+  "aggiungi",
+  "apri",
+  "cerca",
+  "chiudi",
+  "modifica",
+  "nessun",
+  "nessuna",
+  "rimuovi",
+]);
 
 interface Offense {
   file: string;
@@ -85,7 +95,9 @@ function distinctItalianWordMatches(text: string): string[] {
  * distinct function words from the list, whole-word, case-insensitive. */
 function flagIfItalian(text: string): string[] | null {
   const matches = distinctItalianWordMatches(text);
-  return matches.length >= 2 ? matches : null;
+  return matches.length >= 2 || matches.some((word) => STRONG_ITALIAN_UI_WORDS.has(word))
+    ? matches
+    : null;
 }
 
 // Candidate string literal: '...' or "..." (no template literals — those
@@ -101,7 +113,7 @@ const CALL_PATTERNS = [
 ];
 
 const PROPERTY_PATTERN = new RegExp(
-  String.raw`\b(?:name|title|description|label|text)\s*:\s*(?:${STRING_LITERAL})`,
+  String.raw`\b(?:name|title|description|label|placeholder|text)\s*:\s*(?:${STRING_LITERAL})`,
   "g"
 );
 
@@ -170,6 +182,13 @@ describe("i18n contract: user-facing strings must be English", () => {
     const fixture = `new Setting(x).setName("No notes found");`;
     const offenses = scanSourceForItalianStrings("fixture.ts", fixture);
     expect(offenses).toEqual([]);
+  });
+
+  it("flags a single unambiguous Italian UI verb", () => {
+    const fixture = `el.createEl("input", { attr: { placeholder: "Cerca…" } });`;
+    const offenses = scanSourceForItalianStrings("fixture.ts", fixture);
+    expect(offenses).toHaveLength(1);
+    expect(offenses[0]?.text).toBe("Cerca…");
   });
 
   it("has no Italian user-facing strings anywhere in src/", () => {

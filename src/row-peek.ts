@@ -109,7 +109,7 @@ export class RowPeekModal extends Modal {
     const body = raw.replace(/^---\n[\s\S]*?\n---\n?/, "");
     await MarkdownRenderer.render(
       this.app,
-      body.trim() || "*Nota vuota.*",
+      body.trim() || "*Empty note.*",
       previewWrap,
       this.file.path,
       this.renderer
