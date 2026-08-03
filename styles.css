@@ -4,6 +4,22 @@
   padding: 6px 4px 12px;
 }
 
+/* Every control in this panel is a real <button> (semantic sidebar controls,
+   7c12c86) — which puts them all in range of Obsidian's own
+   `button:not(.clickable-icon) { background: var(--interactive-normal) }`.
+   That rule is (0,1,1) — `:not()` contributes its argument's specificity — so
+   it beats the plain `.supertags-row-main`-style class selectors below, and
+   every row renders as a filled system button.
+
+   Invisible on a light theme (`--interactive-normal` is white at 5%), a solid
+   card behind each row on a dark one. One scoped rule at (0,2,0) neutralises
+   it for the whole panel, so the individual `background: transparent`
+   declarations below express intent rather than fight for it. Specificity,
+   never `!important` (mv-kit). */
+.supertags-panel button:not(.clickable-icon) {
+  background: transparent;
+}
+
 /* Header */
 .supertags-header {
   display: flex;
