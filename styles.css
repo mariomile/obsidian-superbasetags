@@ -445,42 +445,7 @@
   padding-top: 4px;
 }
 
-/* Pill palette (fallback when the marioverse-bases snippet is off).
-   Same rules as snippet §5 — Craft chips: tint + dot, no hard border. */
-.mv-pill {
-  --mv-pill-color: var(--text-muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 1px 8px;
-  border-color: transparent;
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--mv-pill-color) 13%, transparent);
-  color: color-mix(in srgb, var(--mv-pill-color) 72%, var(--text-normal));
-  font-family: var(--font-interface);
-  font-size: 0.7rem;
-  font-weight: 580;
-  line-height: 1.6;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-.mv-pill::before {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--mv-pill-color);
-  content: '';
-  flex: 0 0 auto;
-}
-.mv-pill-red    { --mv-pill-color: var(--color-red); }
-.mv-pill-orange { --mv-pill-color: var(--color-orange); }
-.mv-pill-yellow { --mv-pill-color: var(--color-yellow); }
-.mv-pill-green  { --mv-pill-color: var(--color-green); }
-.mv-pill-cyan   { --mv-pill-color: var(--color-cyan); }
-.mv-pill-blue   { --mv-pill-color: var(--color-blue); }
-.mv-pill-purple { --mv-pill-color: var(--color-purple); }
-.mv-pill-pink   { --mv-pill-color: var(--color-pink); }
-.mv-pill-gray   { --mv-pill-color: var(--text-muted); }
+
 
 /* MOBILE KIT (pattern suite, nato in masonry 2026-07-10): su pointer coarse
    i controlli raggiungono 44pt Apple HIG estendendo l'HIT AREA con uno
@@ -521,3 +486,68 @@
     transition: none;
   }
 }
+
+/* >>> VENDORED marioverse-kit/css/mv-pill.css — non editare qui >>> */
+/* marioverse-kit · mv-pill — sorgente canonica della capsula-etichetta.
+ *
+ * Condivisa fra il tema (Bases skin) e superbasetags. Nata come due copie a
+ * mano tenute allineate a occhio — esattamente la deriva che il kit toglie: al
+ * 2026-08-04 differivano su font-weight (580 vs 560), line-height (1.6 vs 1.5),
+ * border-color, e il rinforzo .theme-light mancava del tutto in superbasetags.
+ *
+ * Vive in un file SUO, separato da mv-seg: dichiara --mv-pill-color, e i
+ * contratti di masonry/horizon/tabx vietano al plugin di dichiarare token
+ * della famiglia --mv- o --cosmos-. Solo i consumatori che quel vincolo non
+ * ce l'hanno possono ospitarla.
+ *
+ * Consumatori: copia vendored in styles.css fra i marcatori, via sync.sh.
+ * Si modifica QUI.
+ */
+
+/* ── .mv-pill — etichetta a capsula, colorabile dall'esterno ────────────────
+   --mv-pill-color è l'unico ingresso: sfondo e testo si derivano da lì con
+   color-mix, così una variante di colore è UNA riga e non un blocco. */
+.mv-pill {
+  --mv-pill-color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px;
+  border-color: transparent;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--mv-pill-color) 13%, transparent);
+  color: color-mix(in srgb, var(--mv-pill-color) 72%, var(--text-normal));
+  font-family: var(--font-interface);
+  font-size: 0.7rem;
+  font-weight: 560;
+  line-height: 1.5;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.mv-pill::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--mv-pill-color);
+}
+
+/* In light il tint al 13% su bianco è quasi invisibile: si rinforza. Mancava
+   nella copia di superbasetags — terza deriva misurata fra le due copie. */
+.theme-light .mv-pill {
+  background: color-mix(in srgb, var(--mv-pill-color) 17%, transparent);
+  color: color-mix(in srgb, var(--mv-pill-color) 58%, var(--text-normal));
+}
+
+.mv-pill-red { --mv-pill-color: var(--color-red); }
+.mv-pill-orange { --mv-pill-color: var(--color-orange); }
+.mv-pill-yellow { --mv-pill-color: var(--color-yellow); }
+.mv-pill-green { --mv-pill-color: var(--color-green); }
+.mv-pill-cyan { --mv-pill-color: var(--color-cyan); }
+.mv-pill-blue { --mv-pill-color: var(--color-blue); }
+.mv-pill-purple { --mv-pill-color: var(--color-purple); }
+.mv-pill-pink { --mv-pill-color: var(--color-pink); }
+.mv-pill-gray { --mv-pill-color: var(--text-muted); }
+/* <<< fine blocco vendored <<< */
