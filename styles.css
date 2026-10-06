@@ -496,7 +496,7 @@
  * border-color, e il rinforzo .theme-light mancava del tutto in superbasetags.
  *
  * Vive in un file SUO, separato da mv-seg: dichiara --mv-pill-color, e i
- * contratti di masonry/horizon/tabx vietano al plugin di dichiarare token
+ * contratti di masonry/horizon vietano al plugin di dichiarare token
  * della famiglia --mv- o --cosmos-. Solo i consumatori che quel vincolo non
  * ce l'hanno possono ospitarla.
  *
