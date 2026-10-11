@@ -24,7 +24,9 @@ import { patchFrontmatter } from "./frontmatter-patch";
 export function formatPropertyValue(v: unknown): string {
   if (v == null) return "";
   if (Array.isArray(v)) return v.map((x) => String(x)).join(", ");
-  return String(v);
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean" || typeof v === "bigint") return String(v);
+  return JSON.stringify(v);
 }
 
 /**
@@ -150,7 +152,7 @@ export class RowPeek {
 
   enable(): void {
     if (this.button) return;
-    const btn = document.createElement("button");
+    const btn = createEl("button");
     btn.className = "supertags-peek-btn";
     btn.textContent = "OPEN";
     btn.addEventListener("click", (e) => {

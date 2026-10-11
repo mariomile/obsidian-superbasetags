@@ -95,7 +95,7 @@ export class PillColorizer {
         // …or a whole view (re)mounted: the target is then the OUTER parent,
         // and only the added subtree contains .bases-view.
         for (const n of Array.from(m.addedNodes)) {
-          if (!(n instanceof HTMLElement)) continue;
+          if (!n.instanceOf(HTMLElement)) continue;
           if (n.matches?.(".bases-view") || n.querySelector?.(".bases-view")) {
             this.schedule();
             return;

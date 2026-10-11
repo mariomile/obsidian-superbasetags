@@ -95,7 +95,7 @@ export class CreateSupertagModal extends Modal {
       new Notice(`Created supertag #${tag}`);
       this.close();
       await this.plugin.rebuild();
-      this.plugin.activateView();
+      void this.plugin.activateView();
     } catch (e) {
       console.error("[supertags] create failed", e);
       new Notice("Failed to create supertag — see console.");

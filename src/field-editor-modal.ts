@@ -4,6 +4,15 @@ import type { FieldType, Supertag, SupertagField } from "./types";
 
 const FIELD_TYPES: FieldType[] = ["text", "number", "date", "list", "checkbox"];
 
+/** Render a field default for the text input (lists comma-joined, objects as JSON). */
+function defaultToString(v: unknown): string {
+  if (v == null) return "";
+  if (Array.isArray(v)) return v.join(",");
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean" || typeof v === "bigint") return String(v);
+  return JSON.stringify(v);
+}
+
 /**
  * Editor for a supertag's default field schema: per-field type and default
  * value. Saved as a per-tag override in the sidecar; the base stays untouched.
@@ -54,7 +63,7 @@ export class FieldEditorModal extends Modal {
       });
       s.addText((t) => {
         t.setPlaceholder("default (optional)");
-        t.setValue(f.default == null ? "" : String(f.default));
+        t.setValue(defaultToString(f.default));
         t.onChange((v) => (f.default = v === "" ? undefined : v));
       });
     }

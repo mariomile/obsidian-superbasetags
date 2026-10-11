@@ -4,6 +4,7 @@ import {
   TFile,
   addIcon,
   debounce,
+  requireApiVersion,
   type Debouncer,
   type WorkspaceLeaf,
 } from "obsidian";
@@ -111,7 +112,8 @@ export default class SupertagsPlugin extends Plugin {
   // --- settings -------------------------------------------------------------
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const saved = (await this.loadData()) as Partial<SupertagsSettings> | null;
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, saved);
   }
 
   async saveSettings(): Promise<void> {
@@ -185,7 +187,13 @@ export default class SupertagsPlugin extends Plugin {
       leaf = workspace.getRightLeaf(false);
       if (leaf) await leaf.setViewState({ type: VIEW_TYPE_SUPERTAGS, active: true });
     }
-    if (leaf) workspace.revealLeaf(leaf);
+    if (!leaf) return;
+    if (requireApiVersion("1.7.2")) {
+      await workspace.revealLeaf(leaf);
+    } else {
+      // Before 1.7.2 revealLeaf was synchronous and untyped as a Promise.
+      (workspace as unknown as { revealLeaf(leaf: WorkspaceLeaf): void }).revealLeaf(leaf);
+    }
   }
 
   // --- commands -------------------------------------------------------------
@@ -193,7 +201,7 @@ export default class SupertagsPlugin extends Plugin {
   private registerCommands(): void {
     this.addCommand({
       id: "open-panel",
-      name: "Open SuperBaseTags panel",
+      name: "Open panel",
       callback: () => void this.activateView(),
     });
     this.addCommand({
