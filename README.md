@@ -21,9 +21,9 @@ SUPERTAGS            ⚙  +
 Part of the marioverse Obsidian plugin suite.
 
 <p align="center">
-  <img src="docs/hub.png" width="380" alt="SuperBaseTags — the supertags hub" />
+  <img src="docs/hub.png" width="900" alt="SuperBaseTags: the supertags hub" />
 </p>
-<p align="center"><em>Every collection with a live member count, one click away.</em></p>
+<p align="center"><em>Every collection with a live member count, one click away. Expand one to list its members.</em></p>
 
 ## What it does
 
