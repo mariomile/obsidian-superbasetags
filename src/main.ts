@@ -62,6 +62,9 @@ export default class SupertagsPlugin extends Plugin {
 
     this.recountDebounced = debounce(
       () => {
+        // Counts are only shown in the panel (which recounts when it opens), and
+        // metadataCache.getTags() walks every note (~11ms on a 5k-note vault).
+        if (this.app.workspace.getLeavesOfType(VIEW_TYPE_SUPERTAGS).length === 0) return;
         this.registry.recount();
         this.refreshView();
       },

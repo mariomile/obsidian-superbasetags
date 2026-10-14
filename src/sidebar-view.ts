@@ -33,6 +33,7 @@ export class SupertagsView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    this.plugin.registry.recount();
     this.render();
   }
 
