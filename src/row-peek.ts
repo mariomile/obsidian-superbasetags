@@ -150,6 +150,18 @@ export class RowPeek {
 
   constructor(private plugin: SupertagsPlugin) {}
 
+  // Added/removed with enable()/disable(): registerDomEvent cannot be undone,
+  // so toggling the setting would stack one more document listener each time
+  // and leave it running after the toggle is off.
+  private onPointerOver = (e: PointerEvent): void => {
+    const target = e.target as HTMLElement | null;
+    const row = target?.closest?.(".bases-view .bases-tr") as HTMLElement | null;
+    if (!row || !this.button) return;
+    // Header rows have no note link — skip them.
+    if (!row.querySelector(".internal-link")) return;
+    if (this.button.parentElement !== row) row.appendChild(this.button);
+  };
+
   enable(): void {
     if (this.button) return;
     const btn = createEl("button");
@@ -166,14 +178,7 @@ export class RowPeek {
     });
     this.button = btn;
 
-    this.plugin.registerDomEvent(document, "pointerover", (e) => {
-      const target = e.target as HTMLElement | null;
-      const row = target?.closest?.(".bases-view .bases-tr") as HTMLElement | null;
-      if (!row || !this.button) return;
-      // Header rows have no note link — skip them.
-      if (!row.querySelector(".internal-link")) return;
-      if (this.button.parentElement !== row) row.appendChild(this.button);
-    });
+    document.addEventListener("pointerover", this.onPointerOver);
 
     this.plugin.addCommand({
       id: "peek-active-note",
@@ -190,6 +195,7 @@ export class RowPeek {
   }
 
   disable(): void {
+    document.removeEventListener("pointerover", this.onPointerOver);
     this.button?.remove();
     this.button = null;
   }
