@@ -35,14 +35,10 @@ export class SupertagRegistry {
     return normalizeTagCounts(cache.getTags?.() ?? {});
   }
 
-  /**
-   * Full rebuild: rescan bases, recompute counts, merge overrides. Pass
-   * `withCounts: false` when no panel shows the counts: getTags() is the bulk
-   * of the cost (~30ms on a 6k-file vault) and the panel recounts on open.
-   */
-  async rebuild(withCounts = true): Promise<void> {
+  /** Full rebuild: rescan bases, recompute counts, merge overrides. */
+  async rebuild(): Promise<void> {
     const scanned = await scanBases(this.deps.app, this.deps.getScanOptions());
-    const counts = withCounts ? this.countTags() : new Map<string, number>();
+    const counts = this.countTags();
     const overrides = this.deps.getOverrides();
     const defaultIcon = this.deps.getDefaultIcon();
 
