@@ -126,7 +126,9 @@ export default class SupertagsPlugin extends Plugin {
   // --- registry lifecycle ---------------------------------------------------
 
   async rebuild(): Promise<void> {
-    await this.registry.rebuild();
+    // Counts are only rendered by the panel, which recounts in onOpen (also for
+    // a deferred leaf that loads later): skip getTags() while no panel exists.
+    await this.registry.rebuild(this.app.workspace.getLeavesOfType(VIEW_TYPE_SUPERTAGS).length > 0);
     this.syncSupertagCommands();
     this.refreshView();
   }
