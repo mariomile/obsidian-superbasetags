@@ -62,9 +62,8 @@ export default class SupertagsPlugin extends Plugin {
 
     this.recountDebounced = debounce(
       () => {
-        // Counts are only shown in the panel (which recounts when it opens), and
-        // metadataCache.getTags() walks every note (~11ms on a 5k-note vault).
-        if (this.app.workspace.getLeavesOfType(VIEW_TYPE_SUPERTAGS).length === 0) return;
+        // Always recount, even with the panel closed: Portal reads
+        // registry.supertags[].memberCount for its collections section.
         this.registry.recount();
         this.refreshView();
       },
@@ -232,20 +231,41 @@ export default class SupertagsPlugin extends Plugin {
   // --- events ---------------------------------------------------------------
 
   private registerEventHandlers(): void {
-    // Note membership changes → recount (cheap).
-    this.registerEvent(this.app.metadataCache.on("changed", () => this.recountDebounced()));
-    this.registerEvent(this.app.metadataCache.on("deleted", () => this.recountDebounced()));
+    // Note membership changes → drop affected member previews now (Portal can
+    // read them any time), recount (cheap) after the debounce.
+    this.registerEvent(
+      this.app.metadataCache.on("changed", (file) => {
+        this.registry.metadataChanged(file);
+        this.recountDebounced();
+      })
+    );
+    this.registerEvent(
+      this.app.metadataCache.on("deleted", (file, prev) => {
+        this.registry.invalidateMembers(file, prev);
+        this.recountDebounced();
+      })
+    );
 
-    // Base file set/content changes → full rebuild.
+    // Base file set/content changes → full rebuild. Any file create/delete/
+    // rename can also change vault order or a member's name.
     const isBase = (f: unknown): f is TFile => f instanceof TFile && f.extension === "base";
     this.registerEvent(
-      this.app.vault.on("create", (f) => isBase(f) && this.rebuildDebounced())
+      this.app.vault.on("create", (f) => {
+        this.registry.invalidateMembers(f);
+        if (isBase(f)) this.rebuildDebounced();
+      })
     );
     this.registerEvent(
-      this.app.vault.on("delete", (f) => isBase(f) && this.rebuildDebounced())
+      this.app.vault.on("delete", (f) => {
+        this.registry.invalidateMembers(f);
+        if (isBase(f)) this.rebuildDebounced();
+      })
     );
     this.registerEvent(
-      this.app.vault.on("rename", (f) => isBase(f) && this.rebuildDebounced())
+      this.app.vault.on("rename", (f) => {
+        this.registry.invalidateMembers(f);
+        if (isBase(f)) this.rebuildDebounced();
+      })
     );
     this.registerEvent(
       this.app.vault.on("modify", (f) => isBase(f) && this.rebuildDebounced())

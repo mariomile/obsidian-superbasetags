@@ -19,7 +19,9 @@ export function debounce<T extends (...a: never[]) => unknown>(fn: T): T {
   return fn;
 }
 
-export class TFile {}
+export class TAbstractFile {}
+export class TFile extends TAbstractFile {}
+export class TFolder extends TAbstractFile {}
 export class Modal {}
 export class Menu {}
 export class Notice {}
@@ -37,3 +39,7 @@ export type EditorSuggestContext = unknown;
 export type EditorSuggestTriggerInfo = unknown;
 export type WorkspaceLeaf = unknown;
 export type Debouncer<A extends unknown[], R> = (...args: A) => R;
+export function addIcon(): void {}
+export function requireApiVersion(): boolean {
+  return true;
+}
